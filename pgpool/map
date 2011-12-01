@@ -1,0 +1,3 @@
+versions/available=pgpool_versions_available()
+versions/latest=pgpool_versions_latest()
+version/url=pgpool_version_url()

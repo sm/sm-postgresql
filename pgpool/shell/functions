@@ -1,0 +1,73 @@
+#!/bin/sh
+
+pgpool_initialize()
+{
+  typeset postgresql_version
+
+  # TODO: detect the version installed in SM...?
+  postgresql_version="$(psql -V | head -1 | awk '{print $NF}')"
+
+  package_version=$(pgpool_versions_latest)
+  package_url=$(pgpool_version_url "${package_version}")
+  package_file="${package_url##*f=}"
+  package_dir="${package_file%.tar.gz}"
+}
+
+pgpool_versions()
+{
+  typeset -ga versions
+  versions=($(
+    curl -s "http://www.pgpool.net/mediawiki/index.php/Downloads" |
+      awk '(/download.php/ && ! /-ha-/ && ! /Admin/){print}' |
+      sed -e 's/.*download.php?f=//' -e 's/".*$//' |
+      sort -r
+  ))
+}
+
+pgpool_latest()
+{
+  pgpool_versions
+  typeset -g latest
+  latest=${versions[1]}
+}
+
+pgpool_versions_latest(){
+  pgpool_latest
+
+  latest="${latest%.tar.gz}"
+  latest="${latest#*II-}"
+  log "${latest}"
+}
+
+pgpool_versions_available() {
+  pgpool_versions
+
+  for version in ${versions[@]}
+  do
+    version="${version%.tar.gz}"
+    version="${version#*II-}"
+    log "${version}"
+  done
+}
+
+pgpool_version_url()
+{
+  typeset _version _path _current
+
+  _version="$1" && shift || fail "A version number must be given."
+
+  pgpool_versions
+
+  for _path in ${versions[@]}
+  do
+    _current="${_path%.tar.gz}"
+    _current="${version#*II-}"
+
+    if [[ "${version}" == "${_current}" ]]
+    then
+      log "http://www.pgpool.net/download.php?f=${_path}"
+      break
+    fi
+  done
+}
+

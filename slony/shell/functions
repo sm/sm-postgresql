@@ -1,0 +1,21 @@
+#!/bin/sh
+
+slony_initialize()
+{
+  trace_filter slony || set -o xtrace
+
+  typeset postgresql_version pgconfig
+
+  config read file "defaults" key "version" from slony prefix package
+
+  package_base_url="http://main.slony.info/downloads/${package_version%.*}/source"
+  package_file="slony1-${package_version}.tar.bz2"
+  package_dir="slony1-${package_version}"
+  pgconfig="$(builtin command -v pg_config)"
+
+  # --with-pgsourcetree="${sm_path}/src/postgresql-${postgresql_version}"
+  configure_flags+=(
+    --with-pgconfigdir="${pgconfig%/*}"
+  )
+}
+
