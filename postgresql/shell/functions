@@ -56,7 +56,7 @@ postgresql_database_setup()
 
     path create "${service_data_path}" owner "${service_user}"
 
-    _command="'$install_path/bin/initdb ${_initdb_flags[*]}'"
+    _command="$install_path/bin/initdb ${_initdb_flags[*]}"
 
     if user is root
     then
