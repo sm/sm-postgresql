@@ -1,3 +1,5 @@
 versions/available=pgpool_versions_available()
 versions/latest=pgpool_versions_latest()
 version/url=pgpool_version_url()
+pcp/md5=pcp_md5()
+md5=pcp_md5()

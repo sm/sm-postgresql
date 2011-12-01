@@ -1,0 +1,3 @@
+typeset postgresql_version
+typeset -ga versions
+typeset -g latest

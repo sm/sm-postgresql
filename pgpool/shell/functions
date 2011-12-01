@@ -1,12 +1,9 @@
 #!/bin/sh
 
-pgpool_initialize()
+pgpool_prefetch()
 {
-  typeset postgresql_version
-
   # TODO: detect the version installed in SM...?
   postgresql_version="$(psql -V | head -1 | awk '{print $NF}')"
-
   package_version=$(pgpool_versions_latest)
   package_url=$(pgpool_version_url "${package_version}")
   package_file="${package_url##*f=}"
@@ -71,3 +68,27 @@ pgpool_version_url()
   done
 }
 
+pcp_md5()
+{
+  typeset _username _password _pg_md5
+  if builtin command -v pg_md5 >/dev/null 2>&1
+  then
+    _pg_md5="$(builtin command -v pg_md5)"
+  else
+    log error "pg_md5 was not found in $PATH\nUsage: sm ${extension} pcp md5 {username} {password}"
+  fi
+
+  if (( $# < 2 ))
+  then
+    log error "Usage: sm ${extension} pcp md5 {username} {password}"
+  else
+    _username="$1"
+    _password="$2"
+    if ! shift 2
+    then
+      log error "Usage: sm ${extension} pcp md5 {username} {password}"
+    fi
+  fi
+
+  log "${_username}:$("${_pg_md5}" "${_password}")"
+}
