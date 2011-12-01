@@ -1,10 +1,5 @@
 #!/bin/sh
 
-NIY "pgpool configure"
-
-cp "${sm_path}/pkg/active/etc/pgpool.conf.sample" "${prefix}/etc/pgpool.conf"
-cp "${sm_path}/pkg/active/etc/pcp.conf.sample" "${prefix}/etc/pcp.conf"
-
 for template in pcp pgpool pool_hba
 do
   template install "${extension}/${template}.conf" \
