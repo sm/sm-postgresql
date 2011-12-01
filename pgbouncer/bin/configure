@@ -1,4 +1,10 @@
 #!/bin/sh
 
-NIY "pgbouncer configure"
+for template in pgbouncer.ini userlist.txt
+do
+  template install "${extension}/${template}" \
+    to "/etc/pgpool/${template}" \
+    owner "${service_user:-"postgres"}" \
+    mode 0644
+done
 
