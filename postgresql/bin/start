@@ -1,4 +1,11 @@
 #!/bin/sh
 
-exec su - "${service_user}" -c "$control start -D '${service_data_path}' -s"
+path enter "${service_data_path}"
+
+package initialize
+
+echo $service_db_path
+
+exec su "${service_user}" \
+  -c "${sm_path}/pkg/versions/${package_version}/bin/pg_ctl start -D '${PGDATA}' -s"
 

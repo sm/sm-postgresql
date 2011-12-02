@@ -1,11 +1,12 @@
 #!/bin/sh
 
-user is root || log error "'postgresql configure' may only be run as root."
+user is root ||
+  log error "'postgresql configure' may only be run as root."
 
 paths create "/etc/postgresql/" "/var/log/postgresql" "/var/run/postgresql" \
   "/var/db/postgresql"
 
-json get \
+json get from ${extension_path}/config/defaults.json \
   string "postgresql/bind" default 0.0.0.0 \
   string "postgresql/port" default 5432 \
   string "postgresql/syslog/facility" default "local0" \
@@ -17,6 +18,8 @@ json get \
   string "postgresql/append/only" default "yes" \
   string "postgresql/append/file" default "appendonly.aof" \
   string "postgresql/log/slow" default 10000
+
+user create unless exists name "${service_user}"
 
 template install "postgresql/postgresql.conf" \
   to "/etc/postgresql/postgresql.conf" \
@@ -51,17 +54,19 @@ template install "postgresql/conf.d" \
   service_data_path "${service_data_path}" \
   port 5432 \
 
-template install "postgresql/monitrc" \
-  to "/etc/monit.d/postgresql.monitrc" \
-  mode 0644 \
-  with \
-  service_bin_path "${sm_path}/pkg/active/bin" \
-  service_pid_file "/var/run/postgresql/postgresql.pid" \
-  service_config_file "/etc/postgresql/postgresql.conf" \
-  service_log_file "/var/log/postgresql/postgresql.log" \
-  start_timeout 30 \
-  port 5432 \
-  bind 127.00.1
+if command exists monit
+then
+  template install "postgresql/monitrc" \
+    to "/etc/monit.d/postgresql.monitrc" \
+    mode 0644 \
+    with \
+    service_bin_path "${sm_path}/pkg/active/bin" \
+    service_pid_file "/var/run/postgresql/postgresql.pid" \
+    service_config_file "/etc/postgresql/postgresql.conf" \
+    service_log_file "/var/log/postgresql/postgresql.log" \
+    start_timeout 30 \
+    port 5432 \
+    bind 127.00.1
 
-monit reload
-
+  monit reload
+fi

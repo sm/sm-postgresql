@@ -4,16 +4,38 @@ typeset -ga configure_flags >/dev/null 2>&1 # Don't care if declared already.
 
 postgresql_initialize()
 {
+  trace_filter postgresql || set -o xtrace
+
+  PATH="${sm_path}/bin:${sm_path}/pkg/active/bin:${sm_path}/pkg/active/sbin:$PATH"
+  export PATH
+
   true \
     ${service_port:=5432} \
-    ${service_bind_interface:="127.0.0.1"} \
-    ${service_user:=${package_user:="postgres"}}
+    ${service_bind_interface:="127.0.0.1"}
+
+  service initialize
+
+  config read file defaults from postgresql version key version prefix package
 
   service_binary="${service_bin_path}/pg_ctl"
   service_cli_binary="${service_bin_path}/psql"
 
+  if user is root
+  then
+    if os is darwin
+    then
+      service_user="_postgres"
+    else
+      service_user="postgres"
+    fi
+  else
+    service_user="$USER"
+  fi
+  package_user="${service_user}"
+
   local _action
 
+  service_data_path="${service_db_path}/${package_version}/data"
   if array is empty service_flags
   then
     _action="${action//\(*}"
@@ -21,7 +43,8 @@ postgresql_initialize()
     service_stop_flags+=( -m fast -w )
   fi
 
-  export PGDATA="${service_data_path}/data"
+  typeset -gx PGDATA
+  PGDATA="${service_data_path}/${package_version}/data"
 
   service_pid_file="${service_data_path}/data/postmaster.pid"
 }
