@@ -57,9 +57,9 @@ postgresql_prefetch()
 
 postgresql_database_setup()
 {
-  local _file _command _initdb_flags
+  local _file _command _initdb_flags file _entries
 
-  path create "${service_data_path}"
+  paths create "${service_data_path}" "${log_path}"
 
   if [[ ${service_user} == "postgresql" ]]
   then service_user="postgres" ; fi
@@ -95,20 +95,6 @@ postgresql_database_setup()
     fi
   fi
 
-  path chown "$service_user:$service_user" recursively "${service_data_path}"
-  path chmod 0700 recursively "${service_data_path}"
-}
-
-postgresql_service_setup()
-{
-  local file _entries
-  log "Configuring postgresql server."
-
-  paths create "${service_data_path}" "${log_path}"
-
-  postgresql_database_setup
-
-  log "service_data_path: ${service_data_path}"
   for file in postgresql pg_hba pg_ident recovery
   do
     if file is missing "${service_data_path}/${file}.conf"
@@ -127,6 +113,12 @@ postgresql_service_setup()
   done
 
   path chown "$service_user:$service_user" recursively "${service_data_path}"
+  path chmod 0700 recursively "${service_data_path}"
+}
+
+postgresql_service_setup()
+{
+  postgresql_database_setup
 }
 
 postgresql_preconfigure()
