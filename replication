@@ -1,0 +1,35 @@
+#!/bin/bash
+#
+# postgresql/replication/setup
+#
+# On the replica server perform the following:
+
+# Stop the replica server
+sm postgresql stop
+master=chargify-dbm-p0
+replica=chargify-dbr-p0 # localhost
+
+# Connect the SSH dots
+# Note that this must succeed before replication can be setup properly below.
+su - postgres -c "ssh -o StrictHostKeyChecking=no postgres@$master 'hostname; ssh -o StrictHostKeyChecking=no postgres@$replica hostname'"
+
+su - postgres -c "mkdir -p /var/db/postgresql/active/data/wal/"
+
+# Remove all wal files on the replica
+rm -f /var/db/postgresql/active/data/wal/*
+
+# Signal a start backup on the $master
+#psql -U postgres -h $master -c"select pg_start_backup('$(date)');"
+psql -U postgres -h $master -c"select pg_start_backup('replication-setup',true);"
+
+# Touch a starting wal file
+su - postgres -c "touch /var/db/postgresql/active/data/wal/00000001.history"
+
+su - postgres -c "rsync -avPz --delete --exclude .svn --exclude recovery.conf --exclude recovery.py --exclude postgresql.conf --exclude pg_log --exclude pg_xlog $master:/var/db/postgresql/active/data/ /var/db/postgresql/active/data/"
+
+find /var/db/postgresql/active/data/pg_xlog -type f | xargs rm -f
+
+psql -U postgres -h $master -c"select pg_stop_backup();"
+
+sm postgresql start
+

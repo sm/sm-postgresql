@@ -39,14 +39,14 @@ postgresql_initialize()
   if array is empty service_flags
   then
     _action="${action//\(*}"
-    service_flags+=(${_action//*_} -D "$service_data_path/data" -s )
+    service_flags+=(${_action//*_} -D "$service_data_path" -s )
     service_stop_flags+=( -m fast -w )
   fi
 
   typeset -gx PGDATA
-  PGDATA="${service_data_path}/${package_version}/data"
+  PGDATA="${service_data_path}"
 
-  service_pid_file="${service_data_path}/data/postmaster.pid"
+  service_pid_file="/var/run/postgresql/postgresql.pid"
 }
 
 postgresql_prefetch()
@@ -66,12 +66,12 @@ postgresql_database_setup()
 
   path chown "$service_user:$service_user" recursively "${service_data_path}"
 
-  if ! path exists "${service_data_path}/data"
+  if ! path exists "${service_data_path}"
   then
     log "Initializing postgresql data directory in $service_data_path"
 
     _initdb_flags=(
-    --pgdata="'${service_data_path}/data'"
+    --pgdata="'${service_data_path}'"
     --encoding=utf8
     --locale=C
     --username=$service_user
@@ -111,18 +111,18 @@ postgresql_service_setup()
   log "service_data_path: ${service_data_path}"
   for file in postgresql pg_hba pg_ident recovery
   do
-    if file is missing "${service_data_path}/data/${file}.conf"
+    if file is missing "${service_data_path}/${file}.conf"
     then
-      if file is missing "$service_data_path/data/${file}.conf.sample"
+      if file is missing "${service_data_path}/${file}.conf.sample"
       then
-        log "Missing $service_data_path/data/${file}.conf.sample, skipping."
+        log "Missing ${service_data_path}/${file}.conf.sample, skipping."
         continue
       fi
-      log "Installing ${file}.conf to ${service_data_path}/data/"
+      log "Installing ${file}.conf to ${service_data_path}/"
 
       files copy force \
-        from "$service_data_path/data/${file}.conf.sample" \
-        to "$service_data_path/data/${file}.conf"
+        from "$service_data_path/${file}.conf.sample" \
+        to "$service_data_path/${file}.conf"
     fi
   done
 
