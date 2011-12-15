@@ -21,3 +21,9 @@ After this you may issue the extension specific commands you require such as:
     sm postgresql install
     sm pgpool install
 
+NOTE: postgresql used to be located in sm-databases, so if you have an
+older sm-databases upgrade it so that you no longer have a postgresql
+extension in it:
+
+    sm set install databases
+

@@ -59,7 +59,7 @@ postgresql_database_setup()
 {
   local _file _command _initdb_flags file _entries
 
-  paths create "${log_path}"
+  paths create "${log_path}" # "${service_db_path}"
   path chown "$service_user:$service_user" recursively "${log_path}"
 
   if [[ ${service_user} == "postgresql" ]]
