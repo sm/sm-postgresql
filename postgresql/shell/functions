@@ -59,12 +59,11 @@ postgresql_database_setup()
 {
   local _file _command _initdb_flags file _entries
 
-  paths create "${service_data_path}" "${log_path}"
+  paths create "${log_path}"
+  path chown "$service_user:$service_user" recursively "${log_path}"
 
   if [[ ${service_user} == "postgresql" ]]
   then service_user="postgres" ; fi
-
-  path chown "$service_user:$service_user" recursively "${service_data_path}"
 
   if ! path exists "${service_data_path}"
   then
@@ -101,11 +100,9 @@ postgresql_database_setup()
     then
       if file is missing "${service_data_path}/${file}.conf.sample"
       then
-        log "Missing ${service_data_path}/${file}.conf.sample, skipping."
         continue
       fi
       log "Installing ${file}.conf to ${service_data_path}/"
-
       files copy force \
         from "$service_data_path/${file}.conf.sample" \
         to "$service_data_path/${file}.conf"
