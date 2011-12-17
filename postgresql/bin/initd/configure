@@ -1,0 +1,10 @@
+#!/bin/sh
+
+user is root || log error "'postgresql configure system' may only be run as root."
+
+template install "postgresql/init.d" \
+  to "${init_scripts_path}/postgresql" \
+  mode 0755 \
+  variables ${postgresql_defaults}
+
+exit 0

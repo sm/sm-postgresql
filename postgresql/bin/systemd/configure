@@ -1,0 +1,14 @@
+#!/bin/sh
+
+user is root || log error "'postgresql configure system' may only be run as root."
+
+if path exists "/lib/systemd/system"
+then
+  template install "postgresql/systemd" \
+    to "/lib/systemd/system/postgresql.service" \
+    mode 0644 \
+    variables ${postgresql_defaults}
+else
+  log error "systemd path /lib/systemd/system is missing, is systemd installed?"
+fi
+

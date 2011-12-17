@@ -1,33 +1,30 @@
 #!/bin/sh
 
-NIY "replication setup"
+if [[ "${USER}" != "${service_user}" ]]
+then
+  log fail "replication setup may only be run as the service user '${service_user}'"
+fi
 
-#json get \
-#  string "postgresql/replication/master" \
-#  string "postgresql/replication/slaves"
+sm postgresql stop
 
-/etc/init.d/postgresql stop
+ssh -o StrictHostKeyChecking=no postgres@${master} \
+  "ssh -o StrictHostKeyChecking=no postgres@${HOSTNAME} uname"
 
-su - ${service_user} \
-  -c "ssh -o StrictHostKeyChecking=no postgres@${postgresql_replication_master} 'ssh -o StrictHostKeyChecking=no postgres@${hostname} uname'"
+files remove "${service_data_path}/wal/*"
 
-files remove /var/db/postgresql/active/wal/*
+psql -U ${service_user} -h ${postgresql_replication_master} -c \
+  "SELECT pg_start_backup('$(date)');"
+
+touch "${service_data_path}/wal/00000001.history"
+
+rsync -avPz --delete --exclude .svn --exclude .git --exclude .hg --exclude pg_log \
+  --exclude 'recovery.*' --exclude postgresql.conf --exclude pg_xlog \
+  ${master}:${service_data_path}/ ${service_data_path}/
+
+find "${service_data_path}/pg_xlog" -type f -exec rm -f {} \;
 
 psql -U ${service_user} -h ${postgresql_replication_master} \
-  -c"select pg_start_backup('`date`');"
+  -c "SELECT pg_stop_backup();"
 
-su - ${service_user} \
-  -c "touch /var/db/postgresql/active/wal/00000001.history"
-
-su - ${service_user} \
-  -c "rsync -avPz --delete --exclude .svn --exclude recovery.conf --exclude recovery.py --exclude postgresql.conf --exclude pg_log --exclude pg_xlog ${postgresql_replication_master}:/var/db/postgresql/active/data/ /var/db/postgres/active/data/"
-
-find /var/db/postgres/active/data/pg_xlog -type f | xargs rm -f
-
-psql -U ${service_user} -h ${postgresql_replication_master} \
-  -c"select pg_stop_backup();"
-
-/etc/init.d/postgresql start
-
-
+sm postgresql start
 

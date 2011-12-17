@@ -1,83 +1,31 @@
 #!/bin/sh
 
-user is root ||
-  log error "'postgresql configure' may only be run as root."
+user is root || log error "'postgresql configure system' may only be run as root."
 
 paths create "/etc/postgresql/" "/var/log/postgresql" "/var/run/postgresql" \
   "/var/db/postgresql"
 
-json get from ${extension_path}/config/defaults.json \
-  string "postgresql/bind" default 0.0.0.0 \
-  string "postgresql/port" default 5432 \
-  string "postgresql/syslog/facility" default "local0" \
-  string "postgresql/databases" default 24 \
-  string "postgresql/max/clients" default 128 \
-  string "postgresql/max/memory" default "128mb" \
-  string "postgresql/max/slow" default 1024 \
-  string "postgresql/append/fsync" default "everysec" \
-  string "postgresql/append/only" default "yes" \
-  string "postgresql/append/file" default "appendonly.aof" \
-  string "postgresql/log/slow" default 10000
-
-user create unless exists name "${service_user}"
+if ! user exists "${service_user}"
+then user create system name "${service_user}" home "${service_db_path}" ; fi
 
 template install "postgresql/postgresql.conf" \
-  to "/etc/postgresql/postgresql.conf" \
+  to "${service_data_path}" \
   mode 0644 \
-  variables \
-    bind "${postgresql_bind}" \
-    port "${postgresql_port}" \
-    syslog_facility "${postgresql_syslog_facility}" \
-    databases "${postgresql_databases}" \
-    max_clients "${postgresql_max_clients}" \
-    max_memory "${postgresql_max_memory}" \
-    max_slow "${postgresql_max_slow}" \
-    append_fsync "${postgresql_append_fsync}" \
-    append_only "${postgresql_append_only}" \
-    append_file "${postgresql_append_file}" \
-    log_slow "${postgresql_log_slow}"
+  variables ${postgresql_defaults}
 
-template install "postgresql/init.d" \
-  to "/etc/init.d/postgresql" \
-  mode 0755 \
-  variables \
-  service_bin_path "${sm_path}/pkg/active/bin"
+for file in postgresql pg_hba pg_ident recovery
+do
+  if file is missing "/etc/postgresql/${file}.conf"
+  then
+    log "Linking ${file}.conf to /etc/postgresql/${file}"
 
-template install "postgresql/conf.d" \
-  to "/etc/conf.d/postgresql.conf" \
-  mode 0755 \
-  variables \
-    service_bin_path "${sm_path}/pkg/active/bin" \
-    service_pid_file "/var/run/postgresql/postgresql.pid" \
-    service_config_file "/etc/postgresql/postgresql.conf" \
-    service_log_file "/var/log/postgresql/postgresql.log" \
-    service_data_path "${service_data_path}" \
-    port 5432 \
+    files link symbolic force \
+      from "$service_data_path/${file}.conf" \
+      to "/etc/postgresql/${file}.conf"
+  fi
+done
 
-if path exists "/lib/systemd/system"
-then
-  template install "postgresql/systemd" \
-    to "/lib/systemd/system/postgresql.service" \
-    mode 0644 \
-      variables \
-      port 5432 \
-      data_path "${service_data_path}"
-fi
+path chown "$service_user:$service_user" recursively "${service_data_path}"
+path chmod 0700 recursively "${service_data_path}"
 
-if command exists monit
-then
-  template install "postgresql/monitrc" \
-    to "/etc/monit.d/postgresql.monitrc" \
-    mode 0644 \
-    variables \
-    service_bin_path "${sm_path}/pkg/active/bin" \
-    service_pid_file "/var/run/postgresql/postgresql.pid" \
-    service_config_file "/etc/postgresql/postgresql.conf" \
-    service_log_file "/var/log/postgresql/postgresql.log" \
-    start_timeout 30 \
-    port 5432 \
-    bind 127.0.0.1
-
-  monit reload
-fi
-
+exit 0

@@ -1,4 +1,13 @@
 #!/bin/sh
 
-exec su - "${service_user}" -c "$control reload -D '${service_data_path}' -s"
+if [[ "$USER" == "${service_user}" ]]
+then
+  exec "${service_bin_path}/pg_ctl" reload -D "${service_data_path}" -s
+else if user is root
+  exec /bin/su "${service_user}" \
+  -c "${service_bin_path}/pg_ctl reload -D '${service_data_path}' -s"
+else
+  log fail "postgresql reload may only be run as either root or ${service_user}"
+fi
+
 

@@ -16,7 +16,7 @@ Group=postgres
 Environment=PGPORT={{port}}
 
 # Location of database directory
-Environment=PGDATA=/var/db/postgresql/active/data
+Environment=PGDATA=/{{service_data_path}}
 
 # Where to send early-startup messages from the server (before the logging
 # options of postgresql.conf take effect)
@@ -25,9 +25,9 @@ StandardOutput=syslog
 # Disable OOM kill on the postmaster
 OOMScoreAdjust=-1000
 
-ExecStart=/usr/bin/pg_ctl start -D ${PGDATA} -s -o "-p ${PGPORT}" -w -t 300
-ExecStop=/usr/bin/pg_ctl stop -D ${PGDATA} -s -m fast
-ExecReload=/usr/bin/pg_ctl reload -D ${PGDATA} -s
+ExecStart={{service_bin_path}}/pg_ctl start -D {{service_data_path}} -s -o "-p {{port}}" -w -t {{start_timeout}}
+ExecStop={{service_bin_path}}/pg_ctl stop -D {{service_data_path}} -s -m fast
+ExecReload={{service_bin_path}}/pg_ctl reload -D {{service_data_path}} -s
 
 # Give a reasonable amount of time for the server to start up/shut down
 TimeoutSec=300

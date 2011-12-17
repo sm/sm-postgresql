@@ -1,0 +1,15 @@
+#!/bin/sh
+
+user is root || log error "'postgresql configure system' may only be run as root."
+
+paths create "/etc/monit.d/"
+
+template install "postgresql/monitrc" \
+  to "/etc/monit.d/postgresql.monitrc" \
+  mode 0644 \
+  variables ${postgresql_defaults}
+
+if command exists monit
+then exec monit reload ; fi
+
+exit 0

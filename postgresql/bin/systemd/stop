@@ -1,0 +1,11 @@
+#!/bin/sh
+
+user is root || log error "'postgresql configure system' may only be run as root."
+
+if command exists systemctl
+then
+  exec systemctl stop postgresql.service
+else
+  log error "systemctl command is missing, is systemd installed?"
+fi
+

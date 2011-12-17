@@ -2,9 +2,9 @@
 
 if command_exists vim
 then
-  ${EDITOR:=vim}
+  ${EDITOR:="vim"}
 else
-  ${EDITOR:=vi}
+  ${EDITOR:="vi"}
 fi
 
 ${EDITOR} "${service_config_path}/${extension}.conf"
