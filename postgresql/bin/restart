@@ -4,6 +4,7 @@ if [[ "$USER" == "${service_user}" ]]
 then
   exec "${service_bin_path}/pg_ctl" restart -D "${service_data_path}" -s
 else if user is root
+then
   exec /bin/su "${service_user}" \
   -c "${service_bin_path}/pg_ctl restart -D '${service_data_path}' -s"
 else
