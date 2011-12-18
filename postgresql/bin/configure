@@ -2,6 +2,9 @@
 
 user is root || log error "'postgresql configure system' may only be run as root."
 
+if ! path exists "${service_data_path}/base"
+then log error "Database must be initialized before configuration may be done: 'postgresql initialize'" ; fi
+
 paths create "/etc/postgresql/" "/var/log/postgresql" "/var/run/postgresql" \
   "/var/db/postgresql"
 
