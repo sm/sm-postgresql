@@ -78,9 +78,6 @@ postgresql_database_initialize()
   trace_filter postgresql || set +o xtrace
   local _file _command _initdb_flags file _entries _dir
 
-  paths create "${log_path}" # "${service_db_path}"
-  path chown "$service_user:$service_user" recursively "${log_path}"
-
   if path exists "${service_data_path}/base"
   then
     log warn "The database in '${service_data_path}' has already been initialized."
