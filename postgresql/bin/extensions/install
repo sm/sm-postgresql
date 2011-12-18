@@ -1,0 +1,13 @@
+#!/bin/sh
+
+if ! user is root
+then log error "Extensions may only be installed as the root user." ; fi
+
+typeset name
+
+for name in ${extension_args}
+do
+  path enter "${sm_path}/src/${package_name}-${package_version}/contrib/${name}"
+  make all install
+done
+
