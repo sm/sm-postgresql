@@ -1,5 +1,5 @@
 #!/bin/sh
 
-find "${sm_path}/src/${package_name}-${package_version}/contrib" \
+find "${sm_path}/src/postgresql-${package_version}/contrib" \
   -mindepth 1 -maxdepth 1 -type d | awk -F/ '{print $NF}' | sort
 
