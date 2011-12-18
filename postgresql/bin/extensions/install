@@ -7,7 +7,7 @@ typeset name
 
 for name in ${extension_args}
 do
-  path enter "${sm_path}/src/${package_name}-${package_version}/contrib/${name}"
+  path enter "${sm_path}/src/postgresql-${package_version}/contrib/${name}"
   make all install
 done
 
