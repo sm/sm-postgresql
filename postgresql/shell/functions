@@ -2,6 +2,7 @@
 
 postgresql_defaults()
 {
+  trace_filter postgresql || set +o xtrace
   if user is root
   then
     if os is darwin
@@ -43,6 +44,7 @@ postgresql_defaults()
 
 postgresql_initialize()
 {
+  trace_filter postgresql || set +o xtrace
   trace_filter postgresql || set -o xtrace
   local _action
 
@@ -66,12 +68,14 @@ postgresql_initialize()
 
 postgresql_prefetch()
 {
+  trace_filter postgresql || set +o xtrace
   package define \
     base_url "http://ftp9.us.postgresql.org/pub/mirrors/postgresql/source/v${package_version}"
 }
 
 postgresql_database_initialize()
 {
+  trace_filter postgresql || set +o xtrace
   local _file _command _initdb_flags file _entries _dir
 
   paths create "${log_path}" # "${service_db_path}"
@@ -116,6 +120,8 @@ postgresql_database_initialize()
 
 postgresql_preconfigure()
 {
+  trace_filter postgresql || set +o xtrace
+
   if [[ "$action" = *install ]]
   then
     configure_flags=(
@@ -130,6 +136,7 @@ postgresql_preconfigure()
 
 postgresql_uninstall()
 {
+  trace_filter postgresql || set +o xtrace
   local _file
 
   paths remove "${prefix_path}/${package_name}" \
