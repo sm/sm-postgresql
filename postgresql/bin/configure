@@ -5,8 +5,7 @@ user is root || log error "'postgresql configure system' may only be run as root
 paths create "/etc/postgresql/" "/var/log/postgresql" "/var/run/postgresql" \
   "/var/db/postgresql"
 
-if ! user exists "${service_user}"
-then user create system name "${service_user}" home "${service_db_path}" ; fi
+user create unless exists system name "${service_user}" home "${service_db_path}"
 
 template install "postgresql/postgresql.conf" \
   to "${service_data_path}" \
