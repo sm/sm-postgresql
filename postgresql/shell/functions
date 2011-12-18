@@ -106,8 +106,8 @@ postgresql_database_initialize()
 
   for _dir in archives wal
   do
-    if ! path exists "${service_db_path}/${_dir}"
-    then paths create "${service_db_path}/${_dir}" ; fi
+    if ! path exists "${service_data_path}/${_dir}"
+    then paths create "${service_data_path}/${_dir}" ; fi
   done
 
   path chown "$service_user:$service_user" recursively "${service_data_path}"
