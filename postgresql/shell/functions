@@ -18,7 +18,7 @@ postgresql_defaults()
   if [[ ${service_user} == "postgresql" ]]
   then service_user="postgres" ; fi
 
-  service_data_path="${service_db_path}/${package_version}/data"
+  service_data_path="/var/db/postgresql/${package_version}/data"
 
   json get from ${extension_path}/config/defaults.json \
     into "postgresql_defaults" \
@@ -29,7 +29,6 @@ postgresql_defaults()
     string "postgresql/max/memory" default "128mb" as "max_memory" \
     string "postgresql/max/slow" default 1024 as "max_sloq" \
     string "postgresql/log/slow" default 10000 as "log_slow" \
-    string "postgresql/data/path" default "${service_data_path}" as "data_path" \
     string "postgresql/service/bin_path" as "service_bin_path" default "${sm_path}/pkg/active/bin" \
     string "postgresql/service/pid_file" as "service_pid_file" default "/var/run/postgresql/postgresql.pid" \
     string "postgresql/service/config_file" as "service_config_file" default "/etc/postgresql/postgresql.conf" \
