@@ -99,7 +99,7 @@ postgresql_database_initialize()
       if ! su - "${service_user}" -c "${_command}"
       then __sm.log.warn "initdb failed, command:\n${_command}" ; fi
     else
-      if ! "${_command}"
+      if ! ${_command}
       then __sm.log.warn "initdb failed, command:\n${_command}" ; fi
     fi
   fi
