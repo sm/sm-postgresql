@@ -7,20 +7,23 @@ In order to install the latest version of PostgreSQL known to the component do:
 
     sm postgresql install
 
-Next we configure the sytem to run PostgreSQL:
+Initialize the PostgreSQL database as the postgres user:
+
+    su - postgres -c 'sm postgresql initialize'
+
+Configure the sytem to run PostgreSQL:
 
     sm postgresql configure
 
-Next we should configure the init.d/rc.d script if we are using as root:
+If we are running as root then we should next configure the init.d/rc.d script:
 
     root# sm postgresql initd configure
 
-
-If you use Monit, configure the PostgreSQL monitrc file:
+If we use Monit, configure the PostgreSQL monitrc file:
 
     sm postgresql monit configure
 
-If you use systemd, configure the PostgreSQL systemd file:
+If we use systemd, configure the PostgreSQL systemd file:
 
     sm postgresql systemd configure
 
