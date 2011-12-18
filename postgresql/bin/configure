@@ -8,7 +8,7 @@ paths create "/etc/postgresql/" "/var/log/postgresql" "/var/run/postgresql" \
 user create unless exists system name "${service_user}" home "${service_db_path}"
 
 template install "postgresql/postgresql.conf" \
-  to "${service_data_path}" \
+  to "${service_data_path}/postgresql.conf" \
   mode 0644 \
   variables ${postgresql_defaults}
 
