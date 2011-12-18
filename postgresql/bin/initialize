@@ -1,7 +1,7 @@
 #!/bin/sh
 
 user is "${service_user:-"postgres"}" ||
-  log error "'postgresql configure system' may only be run as root."
+  log error "'postgresql initialize' may only be run as root."
 
 postgresql_database_initialize
 
