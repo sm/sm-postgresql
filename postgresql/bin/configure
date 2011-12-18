@@ -17,12 +17,12 @@ template install "postgresql/postgresql.conf" \
 
 for file in postgresql pg_hba pg_ident recovery
 do
-  if file is missing "/etc/postgresql/${file}.conf"
+  if file is missing "/etc/postgresql/${file}.conf" && file exists "${service_data_path}/${file}.conf"
   then
     log "Linking ${file}.conf to /etc/postgresql/${file}"
 
     files link symbolic force \
-      from "$service_data_path/${file}.conf" \
+      from "${service_data_path}/${file}.conf" \
       to "/etc/postgresql/${file}.conf"
   fi
 done
