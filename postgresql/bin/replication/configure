@@ -2,8 +2,27 @@
 
 if [[ "${USER}" != "${service_user}" ]]
 then
-  log fail "replication setup may only be run as the service user '${service_user}'"
+  log fail "'replication configure' may only be run as the PosgreSQL user '${service_user}'"
 fi
+
+typeset _token master
+while (( ${#extension_args} ))
+do
+  array shift extension_args into _token
+
+  case "${_token}" in
+    (master)
+      array shift extension_args into master
+      if variable is empty ${master}
+      then
+        log error "The master [user]@host/IP identification string must follow keyword 'master'"
+      fi
+      ;;
+    (*)
+      log error "Unrecognized command line option '${_token}'"
+  esac
+done
+
 
 sm postgresql stop
 
@@ -12,7 +31,7 @@ ssh -o StrictHostKeyChecking=no postgres@${master} \
 
 files remove "${service_data_path}/wal/*"
 
-psql -U ${service_user} -h ${postgresql_replication_master} -c \
+psql -U ${service_user} -h ${master} -c \
   "SELECT pg_start_backup('$(date)');"
 
 touch "${service_data_path}/wal/00000001.history"
@@ -23,7 +42,7 @@ rsync -avPz --delete --exclude .svn --exclude .git --exclude .hg --exclude pg_lo
 
 find "${service_data_path}/pg_xlog" -type f -exec rm -f {} \;
 
-psql -U ${service_user} -h ${postgresql_replication_master} \
+psql -U ${service_user} -h ${master} \
   -c "SELECT pg_stop_backup();"
 
 sm postgresql start

@@ -47,16 +47,6 @@ To obtain the status of the PostgreSQL process:
 
 ## Advanced
 
-### Replication
-
-If you wish to setup replication, first perform Installation and Configuration
-on both the master and replica servers. Once you have tuned your
-configuration files to your liking, on the replica server run:
-
-    sm postgresql replication setup master postgres@{{master}}
-
-You will need to ensure that the postgres user can ssh to and from each host.
-
 ### Extensions
 
 If you wish to work with extensions then you can do the following:
@@ -83,4 +73,17 @@ extensions you may do so:
 
     sm postgresql extensions disable hstore tsearch2
     sm postgresql extensions enable hstore tsearch2
+
+### Replication
+
+NOTE: Replication is a work in progress, it needs some more testing,
+help with this is *greatly* appreciated!
+
+If you wish to setup replication, first perform Installation and Configuration
+on both the master and replica servers. Once you have tuned your
+configuration files to your liking, on the replica server run:
+
+    sm postgresql replication configure master postgres@{{master}}
+
+You will need to ensure that the postgres user can ssh to and from each host.
 
