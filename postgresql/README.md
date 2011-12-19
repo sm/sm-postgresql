@@ -77,3 +77,10 @@ In order to list the all/available/installed extensions:
     sm postgresql extensions available
     sm postgresql extensions installed
 
+Installation automatically enables (creates) an extension within the
+running PostgreSQL cluster. If you wish to toggle any of the installed
+extensions you may do so:
+
+    sm postgresql extensions disable hstore tsearch2
+    sm postgresql extensions enable hstore tsearch2
+

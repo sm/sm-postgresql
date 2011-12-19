@@ -17,4 +17,9 @@ Once you have ensured this you can install postgis:
 
     sm postgis install
 
+Installation automatically enables (creates) the postgis extension however you
+can toggle this with the two commands:
+
+    sm postgis enable
+    sm postgis disable
 
