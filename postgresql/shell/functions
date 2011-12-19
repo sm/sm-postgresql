@@ -69,7 +69,7 @@ postgresql_prefetch()
 {
   trace_filter postgresql || set +o xtrace
   package define \
-    base_url "http://ftp9.us.postgresql.org/pub/mirrors/postgresql/source/v${package_version}"
+    base_url "ftp://ftp.postgresql.org/pub/source/v${package_version}"
 }
 
 postgresql_database_initialize()
