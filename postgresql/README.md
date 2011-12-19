@@ -80,8 +80,17 @@ NOTE: Replication is a work in progress, it needs some more testing,
 help with this is *greatly* appreciated!
 
 If you wish to setup replication, first perform Installation and Configuration
-on both the master and replica servers. Once you have tuned your
-configuration files to your liking, on the replica server run:
+on both the master and replica servers.
+
+Next ensure that the pg\_hba.conf on master has a replication line configured
+for the relpica(s) you will use.
+
+Now place the ~/.ssh/id\_replication.pub file from the replica into the master's
+.ssh/authorized\_keys file and similarly from the master onto the replica.
+
+Once these steps are complete and you have tuned your configuration files as
+required for replication you are ready to configure replicatoin.
+On each replica server run:
 
     sm postgresql replication configure master postgres@{{master}}
 

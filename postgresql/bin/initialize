@@ -3,5 +3,7 @@
 user is "${service_user:-"postgres"}" ||
   log error "'postgresql initialize' may only be run as user '${service_user:-"postgres"}'."
 
+ssh-keygen -t rsa -b 2048 -f ~/.ssh/id_replication -N '' -C "$HOSTNAME key"
+
 postgresql_database_initialize
 

@@ -5,45 +5,85 @@ then
   log fail "'replication configure' may only be run as the PosgreSQL user '${service_user}'"
 fi
 
-typeset _token master
+typeset -g master replica port password user
+typeset token
+user="postgres"
+port=5432
+
 while (( ${#extension_args} ))
 do
-  array shift extension_args into _token
-
-  case "${_token}" in
+  array shift extension_args into token
+  case "${token}" in
     (master)
       array shift extension_args into master
-      if variable is empty ${master}
-      then
-        log error "The master [user]@host/IP identification string must follow keyword 'master'"
-      fi
+      if variable is empty master
+      then log error "The master host/IP identification string must follow keyword 'master'" ; fi
+      ;;
+    (replica)
+      array shift extension_args into replica
+      if variable is empty replica
+      then log error "The replica host/IP identification string must follow keyword 'replica'" ; fi
+      ;;
+    (port)
+      array shift extension_args into port
+      if variable is empty port
+      then log error "The system port name of PostgreSQL on the master server must be specified after keyword 'port'" ; fi
+      ;;
+    (password)
+      array shift extension_args into password
+      if variable is empty password
+      then log error "The system password name of PostgreSQL on the master server must be specified after keyword 'password'" ; fi
+      ;;
+    (user)
+      array shift extension_args into user
+      if variable is empty user
+      then log error "The system user name of PostgreSQL on the master server must be specified after keyword 'user'" ; fi
       ;;
     (*)
-      log error "Unrecognized command line option '${_token}'"
+      if variable is nonempty token
+      then log error "Unrecognized command line option '${token}'" ; fi
+      ;;
   esac
 done
 
+if variable is empty master
+then
+  log error "The master hostname (dns resolvable) or IP address must be given as 'master X'"
+elif variable is empty replica
+then
+  log error "The replica hostname (dns resolvable) or IP address must be given as 'replica X'"
+fi
 
-sm postgresql stop
+sm postgresql stop || true # if already stopped we're good to go.
 
-ssh -o StrictHostKeyChecking=no postgres@${master} \
-  "ssh -o StrictHostKeyChecking=no postgres@${HOSTNAME} uname"
+template install "postgresql/recovery.conf" \
+  to "${service_data_path}/recovery.conf" \
+  mode 0600 \
+  variables host "${master}" port "${5432}" user "${user}" password "${password}"
+
+ssh -i $HOME/.ssh/id_replication -o StrictHostKeyChecking=no ${user}@${master} \
+  "ssh -i \$HOME/.ssh/id_replication -o StrictHostKeyChecking=no ${USER}@${replica} uname"
 
 files remove "${service_data_path}/wal/*"
 
-psql -U ${service_user} -h ${master} -c \
-  "SELECT pg_start_backup('$(date)');"
+ssh -i $HOME/.ssh/id_replication -o StrictHostKeyChecking=no ${user}@${master} \
+  "psql -d postgres -c \"SELECT pg_start_backup('$(date)');\""
 
 touch "${service_data_path}/wal/00000001.history"
 
 rsync -avPz --delete --exclude .svn --exclude .git --exclude .hg --exclude pg_log \
   --exclude 'recovery.*' --exclude postgresql.conf --exclude pg_xlog \
-  ${master}:${service_data_path}/ ${service_data_path}/
+  ${user}@${master}:${service_data_path}/ ${service_data_path}/
 
 find "${service_data_path}/pg_xlog" -type f -exec rm -f {} \;
 
-psql -U ${service_user} -h ${master} \
-  -c "SELECT pg_stop_backup();"
+ssh -i $HOME/.ssh/id_replication -o StrictHostKeyChecking=no ${user}@${master} \
+  "psql -d postgres -c \"SELECT pg_stop_backup();\""
+
+if file exists "${sm_data_path}/backup_label"
+then
+  file remove "${sm_data_path}/backup_label"
+fi
 
 sm postgresql start
 

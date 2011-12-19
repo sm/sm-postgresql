@@ -2,9 +2,9 @@
 
 if command exists vim
 then
-  ${EDITOR:="vim"}
+  EDITOR=${EDITOR:="vim"}
 else
-  ${EDITOR:="vi"}
+  EDITOR=${EDITOR:="vi"}
 fi
 
 path enter "${service_data_path}/"
