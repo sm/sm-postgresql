@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if command_exists vim
+if command exists vim
 then
   ${EDITOR:="vim"}
 else
