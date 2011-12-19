@@ -8,6 +8,8 @@ typeset name
 for name in ${extension_args}
 do
   path enter "${sm_path}/src/postgresql-${package_version}/contrib/${name}"
-  make all install
+  make all install &&
+  "${sm_path}/pkg/active/bin/psql" -U ${service_user} postgres \
+    -c "CREATE EXTENSION IF NOT EXISTS ${name};"
 done
 
