@@ -1,0 +1,13 @@
+#!/bin/sh
+
+if ! user is root
+then log error "Extensions may only be installed as the root user." ; fi
+
+typeset name
+
+for name in ${extension_args}
+do
+  "${sm_path}/pkg/active/bin/psql" -U ${service_user} postgres \
+    -c "CREATE EXTENSION IF NOT EXISTS ${name};"
+done
+

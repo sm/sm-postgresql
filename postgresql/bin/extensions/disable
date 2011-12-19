@@ -1,0 +1,14 @@
+#!/bin/sh
+
+if ! user is root
+then log error "Extensions may only be installed as the root user." ; fi
+
+typeset name
+
+for name in ${extension_args}
+do
+  # TODO: Should we default to CASCADE ?
+  "${sm_path}/pkg/active/bin/psql" -U ${service_user} postgres \
+    -c "DROP EXTENSION IF EXISTS ${name};"
+done
+
