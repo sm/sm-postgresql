@@ -12,8 +12,7 @@ path enter "${service_data_path}/"
 typeset -a files
 files=(postgresql.conf pg_hba.conf pg_ident.conf)
 if file exists recovery.conf
-  files+=(recovery.conf)
-fi
+then files+=(recovery.conf) ; fi
 
 ${EDITOR} ${files}
 
