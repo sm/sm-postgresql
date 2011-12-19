@@ -14,5 +14,4 @@ files=(postgresql.conf pg_hba.conf pg_ident.conf)
 if file exists recovery.conf
 then files+=(recovery.conf) ; fi
 
-${EDITOR} ${files}
-
+exec ${EDITOR} ${files[@]}
