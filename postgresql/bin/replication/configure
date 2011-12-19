@@ -59,7 +59,12 @@ sm postgresql stop || true # if already stopped we're good to go.
 template install "postgresql/recovery.conf" \
   to "${service_data_path}/recovery.conf" \
   mode 0600 \
-  variables host "${master}" port "${5432}" user "${user}" password "${password}"
+  variables \
+  host "${master}" \
+  port "${port}" \
+  user "${user}" \
+  password "${password}" \
+  data_path "${service_data_path}"
 
 ssh -i $HOME/.ssh/id_replication -o StrictHostKeyChecking=no ${user}@${master} \
   "ssh -i \$HOME/.ssh/id_replication -o StrictHostKeyChecking=no ${USER}@${replica} uname"
@@ -77,6 +82,10 @@ rsync -avPz --delete --exclude .svn --exclude .git --exclude .hg --exclude pg_lo
 
 find "${service_data_path}/pg_xlog" -type f -exec rm -f {} \;
 
+sm postgresql start
+
+sleep 2
+
 ssh -i $HOME/.ssh/id_replication -o StrictHostKeyChecking=no ${user}@${master} \
   "psql -d postgres -c \"SELECT pg_stop_backup();\""
 
@@ -84,6 +93,4 @@ if file exists "${sm_data_path}/backup_label"
 then
   file remove "${sm_data_path}/backup_label"
 fi
-
-sm postgresql start
 
