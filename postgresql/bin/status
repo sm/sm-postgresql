@@ -7,8 +7,7 @@ then
 elif user is root
 then
   exec /bin/su "${service_user}" \
-    -c "${service_bin_path}/pg_ctl status -D '${service_data_path}' -s"
-
+    -c "cd ${service_data_path};${service_bin_path}/pg_ctl status -D '${service_data_path}' -s"
 else
   log fail "postgresql status may only be run as either root or ${service_user}"
 fi
