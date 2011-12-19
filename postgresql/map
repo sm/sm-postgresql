@@ -15,3 +15,6 @@ ext/list=extensions/list
 ext/install=extensions/install
 ext/installed=extensions/installed
 ext/available=extensions/available
+ext/enable=extensions/enable
+ext/disable=extensions/disable
+ext/enabled=extensions/enabled
