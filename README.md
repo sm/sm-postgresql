@@ -6,11 +6,23 @@ This set contains the following postgresql related extensions:
 * postgresql
 * pgpool
 * pgbouncer
+* postgis
+* queue\_classic
 * slony
 
-To install this extension, with the latest SM Framework you can do:
+Please see each extension's readme file for more details than are provied below:
 
-    sm set install postgresql
+    postgresql/README.md
+    pgbouncer/README.md
+    pgpool/README.md
+    postgis/README.md
+    queue_classic/README.md
+    slony/README.md
+
+To install this extension set, with the latest SM Framework you can do:
+
+    sm get head               # Ensuring we are on the latest SM Framework.
+    sm set install postgresql # Installing this (known) extension set.
 
 Alternatively the uri may be specified:
 
