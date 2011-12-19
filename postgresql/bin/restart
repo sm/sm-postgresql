@@ -6,10 +6,9 @@ then
 
 else if user is root
 then
-  exec /bin/su "${service_user}" \
+  exec su "${service_user}" \
   -c "${service_bin_path}/pg_ctl restart -D '${service_data_path}' -s"
 else
   log fail "postgresql restart may only be run as either root or ${service_user}"
 fi
-
 
