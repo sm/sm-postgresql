@@ -68,7 +68,12 @@ In order to install an extension, say hstore and tsearch2:
     sm postgresql extensions install hstore
     sm postgresql extensions install tsearch2
 
-In order to list the installed extensions:
+Note that you should do this while the PostgreSQL cluter is running so that the
+CREATE EXTENSION statement is successful.
 
+In order to list the all/available/installed extensions:
+
+    sm postgresql extensions list
+    sm postgresql extensions available
     sm postgresql extensions installed
 
