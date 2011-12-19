@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if ! user is root
+then log error "Extensions may only be installed as the root user." ; fi
+
+"${sm_path}/pkg/active/bin/psql" -U ${service_user} postgres \
+  -c "psql -U postgres postgres --tuples-only -c 'SELECT extname FROM pg_extension'"
+
