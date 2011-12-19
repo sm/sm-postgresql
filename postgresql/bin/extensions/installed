@@ -1,5 +1,12 @@
 #!/bin/sh
 
-find "${sm_path}/pkg/versions/postgresql/${package_version}/data/extension" \
-   -mindepth 1 -maxdepth 1 -iname '*.control' -type f | sed -e 's#.*\/##' -e 's/.control//'
+typeset -a installed
+
+installed=($(
+  find "${sm_path}/pkg/versions/postgresql/${package_version}/data/extension" \
+    -mindepth 1 -maxdepth 1 -iname '*.control' -type f | sed -e 's#.*\/##' -e 's/.control//'
+))
+
+log ${installed}
+
 

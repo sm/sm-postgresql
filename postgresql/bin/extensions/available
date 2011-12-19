@@ -1,5 +1,11 @@
 #!/bin/sh
 
-find "${sm_path}/src/postgresql-${package_version}/contrib" \
-  -mindepth 1 -maxdepth 1 -type d | awk -F/ '{print $NF}' | sort
+typeset -a available
+
+available=($(
+  find "${sm_path}/src/postgresql-${package_version}/contrib" \
+    -mindepth 1 -maxdepth 1 -type d | awk -F/ '{print $NF}' | sort
+))
+
+log ${available}
 

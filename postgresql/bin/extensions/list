@@ -1,0 +1,17 @@
+#!/bin/sh
+
+typeset -a installed available
+
+available=($(
+  find "${sm_path}/src/postgresql-${package_version}/contrib" \
+    -mindepth 1 -maxdepth 1 -type d | awk -F/ '{print $NF}' | sort
+))
+
+installed=($(
+  find "${sm_path}/pkg/versions/postgresql/${package_version}/data/extension" \
+    -mindepth 1 -maxdepth 1 -iname '*.control' -type f | sed -e 's#.*\/##' -e 's/.control//'
+))
+
+log "installed: ${installed}"
+log "available: ${available}"
+
