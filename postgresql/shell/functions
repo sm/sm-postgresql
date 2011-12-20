@@ -93,7 +93,7 @@ postgresql_defaults()
     string "postgresql/service/user" as "service_user" default "${service_user}" \
     string "postgresql/service/data_path" as "service_data_path" default "${service_data_path}" \
     string "postgresql/start/timeout" as "start_timeout" default "300" \
-    string "postgresql/replication/master" as "master" default "localhost" \
+    string "postgresql/replication/master" as "master" default "${master:-localhost}" \
     string "postgresql/wal/buffers" as "wal_buffers" default "8MB" \
     string "postgresql/wal/writer_delay" as "wal_writer_delay" default "200ms" \
     string "postgresql/wal/max_senders" as "wal_max_senders" default "5" \
