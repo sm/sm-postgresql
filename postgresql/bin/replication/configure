@@ -25,17 +25,17 @@ template install "postgresql/recovery.conf" \
   password "${password}" \
   data_path "${service_data_path}"
 
-ssh ${ssh_options} ${user}@${master}  \
-  "hostname;ssh ${ssh_options} ${USER}@${replica} hostname"
+ssh ${=ssh_options} ${user}@${master}  \
+  "hostname;ssh ${=ssh_options} ${USER}@${replica} hostname"
 
 files remove "${service_data_path}/wal/*"
 
-ssh ${ssh_options} ${user}@${master} \
+ssh ${=ssh_options} ${user}@${master} \
   "psql -d postgres -c \"SELECT pg_start_backup('$(date)');\""
 
 touch "${service_data_path}/wal/00000001.history"
 
-rsync -avPz --delete -e "${ssh_options}" \
+rsync -avPz --delete -e "${=ssh_options}" \
   --exclude .svn --exclude .git --exclude .hg --exclude pg_log \
   --exclude 'recovery.*' --exclude postgresql.conf --exclude pg_xlog \
   ${user}@${master}:${service_data_path}/ ${service_data_path}/
@@ -46,7 +46,7 @@ sm postgresql start
 
 sleep 2
 
-ssh ${ssh_options} ${user}@${master} \
+ssh ${=ssh_options} ${user}@${master} \
   "psql -d postgres -c \"SELECT pg_stop_backup();\""
 
 if file exists "${sm_data_path}/backup_label"
