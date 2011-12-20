@@ -1,5 +1,62 @@
 #!/bin/sh
 
+postgresql_cli()
+{
+  typeset token
+  user="postgres"
+  port=5432
+  ssh_port=22
+  ssh_identity="$HOME/.ssh/id_replication"
+
+  while (( ${#extension_args} ))
+  do
+    array shift extension_args into token
+    case "${token}" in
+      (master)
+        array shift extension_args into master
+        if variable is empty master
+        then log error "The master host/IP identification string must follow keyword 'master'" ; fi
+        ;;
+      (replica)
+        array shift extension_args into replica
+        if variable is empty replica
+        then log error "The replica host/IP identification string must follow keyword 'replica'" ; fi
+        ;;
+      (port)
+        array shift extension_args into port
+        if variable is empty port
+        then log error "The system port name of PostgreSQL on the master server must be specified after keyword 'port'" ; fi
+        ;;
+      (ssh_port)
+        array shift extension_args into ssh_port
+        if variable is empty ssh_port
+        then log error "The system ssh_port name of PostgreSQL on the master server must be specified after keyword 'ssh_port'" ; fi
+        ;;
+      (ssh_identity)
+        array shift extension_args into ssh_identity
+        if variable is empty ssh_identity
+        then log error "The system ssh_identity name of PostgreSQL on the master server must be specified after keyword 'ssh_identity'" ; fi
+        ;;
+      (password)
+        array shift extension_args into password
+        if variable is empty password
+        then log error "The system password name of PostgreSQL on the master server must be specified after keyword 'password'" ; fi
+        ;;
+      (user)
+        array shift extension_args into user
+        if variable is empty user
+        then log error "The system user name of PostgreSQL on the master server must be specified after keyword 'user'" ; fi
+        ;;
+      (*)
+        if variable is nonempty token
+        then log error "Unrecognized command line option '${token}'" ; fi
+        ;;
+    esac
+  done
+
+  ssh_options="-i ${ssh_identity} -oPort=${ssh_port} -o StrictHostKeyChecking=no "
+}
+
 postgresql_defaults()
 {
   trace_filter postgresql || set +o xtrace
