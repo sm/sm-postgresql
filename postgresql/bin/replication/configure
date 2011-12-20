@@ -41,7 +41,7 @@ sm postgresql start
 
 sleep 2
 
-eval "ssh ${ssh_options} ${user}@${master} \\\"psql -d postgres -c 'SELECT pg_stop_backup();'\\\""
+eval "ssh ${ssh_options} ${user}@${master} \"psql -d postgres -c \\\"SELECT pg_stop_backup();\\\"\""
 
 if file exists "${sm_data_path}/backup_label"
 then
