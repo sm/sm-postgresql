@@ -2,6 +2,8 @@
 
 postgresql_cli()
 {
+  trace_filter postgresql || set +o xtrace
+
   typeset token
   user="postgres"
   port=5432

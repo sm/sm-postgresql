@@ -33,7 +33,7 @@ eval "ssh ${ssh_options} ${user}@${master} \"psql -d postgres -c \\\"SELECT pg_s
 
 touch "${service_data_path}/wal/00000001.history"
 
-eval "rsync -avPz --delete -e \"${ssh_options}\" --exclude .svn --exclude .git --exclude .hg --exclude pg_log --exclude 'recovery.*' --exclude postgresql.conf --exclude pg_xlog ${user}@${master}:${service_data_path}/ ${service_data_path}/ "
+eval "rsync -avPz --delete -e \"ssh ${ssh_options}\" --exclude .svn --exclude .git --exclude .hg --exclude pg_log --exclude 'recovery.*' --exclude postgresql.conf --exclude pg_xlog ${user}@${master}:${service_data_path}/ ${service_data_path}/ "
 
 find "${service_data_path}/pg_xlog" -type f -exec rm -f {} \;
 
