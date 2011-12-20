@@ -4,6 +4,7 @@ postgresql_cli()
 {
   trace_filter postgresql || set +o xtrace
 
+  typeset -a newargs
   typeset token
   user="postgres"
   port=5432
@@ -51,10 +52,14 @@ postgresql_cli()
         ;;
       (*)
         if variable is nonempty token
-        then log error "Unrecognized command line option '${token}'" ; fi
+        then
+          newargs+=("${token}")
+        fi
         ;;
     esac
   done
+
+  extension_args=("${newargs[@]}")
 
   ssh_options="-i ${ssh_identity} -oPort=${ssh_port} -o StrictHostKeyChecking=no "
 }
