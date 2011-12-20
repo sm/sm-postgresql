@@ -5,4 +5,9 @@ then
   log fail "'replication master status' may only be run as the PosgreSQL user '${service_user}'"
 fi
 
-eval "ssh ${ssh_options} ${user}@${master} \"psql -d postgres -c \\\"SELECT pg_current_xlog_location();\\\"\""
+if ifconfig | grep ${master} > /dev/null
+then
+  psql -U ${user} -d postgres -t -A  -c "SELECT pg_current_xlog_location();"
+else
+  eval "ssh ${ssh_options} ${user}@${master} \"psql -d postgres -t -A -c \\\"SELECT pg_current_xlog_location();\\\"\""
+fi

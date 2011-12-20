@@ -6,4 +6,10 @@ then
 fi
 # This script configures the replica's postgresql.conf for replication.
 
-eval "ssh ${ssh_options} ${user}@${replica} \"psql -d postgres -c \\\"SELECT pg_last_xlog_receive_location();\\\"\""
+if ifconfig | grep ${replica} > /dev/null
+then
+  psql -U ${user} -d postgres -t -A -c "SELECT pg_last_xlog_receive_location();"
+else
+  eval "ssh ${ssh_options} ${user}@${replica} \"psql -d postgres -t -A -c \\\"SELECT pg_last_xlog_receive_location();\\\"\""
+fi
+

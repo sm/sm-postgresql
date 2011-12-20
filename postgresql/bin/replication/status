@@ -14,8 +14,18 @@ then
 fi
 
 log "master-${master}: "
-eval "ssh ${ssh_options} ${user}@${master} \"psql -d postgres -c \\\"SELECT pg_current_xlog_location();\\\"\""
+if ifconfig | grep ${master} > /dev/null
+then
+  psql -U ${user} -d postgres -t -A  -c "SELECT pg_current_xlog_location();"
+else
+  eval "ssh ${ssh_options} ${user}@${master} \"psql -d postgres -t -A -c \\\"SELECT pg_current_xlog_location();\\\"\""
+fi
 
 log "replica-${replica}:"
-eval "ssh ${ssh_options} ${user}@${replica} \"psql -d postgres -c \\\"SELECT pg_last_xlog_receive_location();\\\"\""
+if ifconfig | grep ${replica} > /dev/null
+then
+  psql -U ${user} -d postgres -t -A -c "SELECT pg_last_xlog_receive_location();"
+else
+  eval "ssh ${ssh_options} ${user}@${replica} \"psql -d postgres -t -A -c \\\"SELECT pg_last_xlog_receive_location();\\\"\""
+fi
 
