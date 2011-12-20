@@ -1,0 +1,9 @@
+#!/bin/sh
+
+if [[ "${USER}" != "${service_user}" ]]
+then
+  log fail "'replication replica status' may only be run as the PosgreSQL user '${service_user}'"
+fi
+# This script configures the replica's postgresql.conf for replication.
+
+eval "ssh ${ssh_options} ${user}@${replica} \"psql -d postgres -c \\\"SELECT pg_last_xlog_receive_location();\\\"\""

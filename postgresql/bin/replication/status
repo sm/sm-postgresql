@@ -1,0 +1,21 @@
+#!/bin/sh
+
+if [[ "${USER}" != "${service_user}" ]]
+then
+  log fail "'replication status' may only be run as the PosgreSQL user '${service_user}'"
+fi
+
+if variable is empty master
+then
+  log error "master must be specified 'master x.x.x.x'"
+elif variable is empty replica
+then
+  log error "replica must be specified 'replica y.y.y.y'"
+fi
+
+log "master-${master}: "
+eval "ssh ${ssh_options} ${user}@${master} \"psql -d postgres -c \\\"SELECT pg_current_xlog_location();\\\"\""
+
+log "replica-${replica}:"
+eval "ssh ${ssh_options} ${user}@${replica} \"psql -d postgres -c \\\"SELECT pg_last_xlog_receive_location();\\\"\""
+

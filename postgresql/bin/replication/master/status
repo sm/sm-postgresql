@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [[ "${USER}" != "${service_user}" ]]
+then
+  log fail "'replication master status' may only be run as the PosgreSQL user '${service_user}'"
+fi
+
+eval "ssh ${ssh_options} ${user}@${master} \"psql -d postgres -c \\\"SELECT pg_current_xlog_location();\\\"\""
