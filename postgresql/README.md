@@ -87,11 +87,14 @@ for the relpica(s) you will use. So for example if I have one replica
 with IP address 10.0.5.212 then I would put an entry as follows
 
     host    replication     postgres        10.0.5.212/32            trust
-    host    postgres        postgres        10.0.5.212/32            trust
 
 Now place the ~/.ssh/id\_replication.pub file from the replica into the master's
 .ssh/authorized\_keys file and similarly from the master onto the replica.
 
+Be sure to turn hot standby on on replica server so that you may connect
+and perform SELECT queries against it.
+
+    hot_standby = on
 
 Once these steps are complete and you have tuned your configuration files as
 required for replication you are ready to configure replicatoin.

@@ -76,6 +76,7 @@ ssh -i $HOME/.ssh/id_replication -o StrictHostKeyChecking=no ${user}@${master} \
 
 touch "${service_data_path}/wal/00000001.history"
 
+# TODO: specify ssh key to use for rsync.
 rsync -avPz --delete --exclude .svn --exclude .git --exclude .hg --exclude pg_log \
   --exclude 'recovery.*' --exclude postgresql.conf --exclude pg_xlog \
   ${user}@${master}:${service_data_path}/ ${service_data_path}/
