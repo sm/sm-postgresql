@@ -1,0 +1,4 @@
+#!/bin/sh
+
+typeset -g postgresql_version
+

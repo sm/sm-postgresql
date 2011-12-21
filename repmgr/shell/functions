@@ -1,0 +1,36 @@
+#!/bin/sh
+
+repmgr_configure()
+{
+  true
+}
+
+repmgr_build()
+{
+  make USE_PGXS=1 > make.log 2>&1
+}
+
+repmgr_install()
+{
+  typeset binary
+
+  make USE_PGXS=1 install > make.install.log 2>&1
+
+  postgresql_version="$(${sm_path}/pkg/active/bin/psql -V | head -1 | awk '{print $NF}')"
+
+  for binary in repmgr repmgrd
+  do
+    file link symbolic force \
+      from "${sm_path}/pkg/versions/postgresql/${postgresql_version}/bin/${binary}" \
+      to "${sm_path}/pkg/active/bin/${binary}"
+  done
+
+  if ! file exists "/etc/postgresql/repmgr.conf"
+  then
+    template install "postgresql/repmgr.conf"
+  fi
+  log ""
+
+  exit 0 # Do not activate / link etc...
+}
+
