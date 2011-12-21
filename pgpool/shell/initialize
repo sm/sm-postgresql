@@ -1,3 +1,4 @@
-typeset postgresql_version
+#!/bin/sh
+
 typeset -ga versions
-typeset -g latest
+typeset -g latest postgresql_version
