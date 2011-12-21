@@ -1,14 +1,20 @@
 #!/bin/sh
 
-pgpool_prefetch()
+pgpool_initialize()
 {
-  # TODO: detect the version installed in SM...?
-  postgresql_version="$(psql -V | head -1 | awk '{print $NF}')"
-  package_version=$(pgpool_versions_latest)
-  package_url=$(pgpool_version_url "${package_version}")
+  postgresql_version="$(${sm_path}/pkg/active/bin/psql -V | head -1 | awk '{print $NF}')"
+  # package_version=$(pgpool_versions_latest)
+
+  package_url="http://www.pgpool.net/download.php?f=pgpool-II-${package_version}.tar.gz"
   package_file="${package_url##*f=}"
   package_dir="${package_file%.tar.gz}"
 }
+
+#pgpool_configure()
+#{
+#  ./configure --prefix="${sm_path}/pkg/versions/pgpool/${package_version}" \
+#    --sysconfdir="/etc" > configure.log 2>&1
+#}
 
 pgpool_versions()
 {
@@ -24,7 +30,6 @@ pgpool_versions()
 pgpool_latest()
 {
   pgpool_versions
-  typeset -g latest
   latest=${versions[1]}
 }
 
