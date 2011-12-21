@@ -24,13 +24,23 @@ repmgr_install()
       from "${sm_path}/pkg/versions/postgresql/${postgresql_version}/bin/${binary}" \
       to "${sm_path}/pkg/active/bin/${binary}"
   done
-
-  if ! file exists "/etc/postgresql/repmgr.conf"
-  then
-    template install "postgresql/repmgr.conf"
-  fi
   log ""
 
   exit 0 # Do not activate / link etc...
 }
 
+repmgr_defaults()
+{
+  trace_filter repmgr || set +o xtrace
+  json get from ${extension_path}/config/defaults.json \
+    into "repmgr_defaults" \
+    string "repmgr/cluster_name" default "repmgr" as "cluster_name" \
+    string "repmgr/node_id" default "2" as "node_id" \
+    string "repmgr/log_facility" default "LOCAL0" as "log_facility" \
+    string "repmgr/log_level" default "NOTICE" as "log_level" \
+    string "repmgr/failover_type" default "automatic" as "failover_type" \
+    string "repmgr/priority" default "-1" as "priority" \
+    string "repmgr/promote_command" default "repmgr promote" as "promote_command" \
+    string "repmgr/follow_command" default "repmgr follow" as "follow_command" \
+    string "repmgr/connection_info" default "host=localhost" as "connection_info"
+}

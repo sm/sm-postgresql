@@ -1,0 +1,17 @@
+#!/bin/sh
+
+if ! user is root
+then
+  log error "repmgr configure may only be run as root."
+fi
+
+if ! file exists "/etc/postgresql/repmgr.conf"
+then
+  if ! path exists "/etc/postgresql"
+  then path create "/etc/postgresql" ; fi
+
+  template install "repmgr/repmgr.conf" \
+    to "/etc/postgresql/repmgr.conf" \
+    mode 0644 \
+    variables ${repmgr_defaults}
+fi

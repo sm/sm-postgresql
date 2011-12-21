@@ -2,3 +2,4 @@ api/package
 api/files
 api/paths
 api/templates
+api/json

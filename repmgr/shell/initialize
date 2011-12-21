@@ -1,4 +1,7 @@
 #!/bin/sh
 
-typeset -g postgresql_version
+typeset -g json_file postgresql_version
 
+json_file="/etc/system.json"
+
+repmgr_defaults
