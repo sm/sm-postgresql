@@ -5,6 +5,10 @@ then
   log fail "'replication configure' may only be run as the PosgreSQL user '${service_user}'"
 fi
 
+# TODO: reflect on if this is the master or replica and do the right thing based on that.
+# Don't forget pg_hba.conf for the replica on the master.
+# And hot_standby = on for replica postgresql.conf
+
 if variable is empty master
 then
   log error "The master hostname (dns resolvable) or IP address must be given as 'master X'"
