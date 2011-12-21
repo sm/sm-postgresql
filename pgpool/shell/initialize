@@ -1,4 +1,9 @@
 #!/bin/sh
 
 typeset -ga versions
-typeset -g latest postgresql_version
+typeset -g latest postgresql_version json_file
+
+json_file="/etc/system.json"
+
+pgpool_defaults
+

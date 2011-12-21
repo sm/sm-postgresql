@@ -10,12 +10,6 @@ pgpool_initialize()
   package_dir="${package_file%.tar.gz}"
 }
 
-#pgpool_configure()
-#{
-#  ./configure --prefix="${sm_path}/pkg/versions/pgpool/${package_version}" \
-#    --sysconfdir="/etc" > configure.log 2>&1
-#}
-
 pgpool_versions()
 {
   typeset -ga versions
@@ -97,3 +91,83 @@ pcp_md5()
 
   log "${_username}:$("${_pg_md5}" "${_password}")"
 }
+
+pgpool_defaults()
+{
+  typeset _file
+
+  if file exists "${json_file}"
+  then
+    _file="${json_file}"
+  else
+    _file="${extension_path}/config/defaults.json"
+  fi
+
+  json get from "${_file}" \
+    into "pgpool_defaults" \
+    string "pgpool/listen_addresses" default "*" as "listen_addresses" \
+    string "pgpool/port" default "9999" as "port" \
+    string "pgpool/socket_path" default "/tmp" as "socket_path" \
+    string "pgpool/pcp_port" default "9898" as "pcp_port" \
+    string "pgpool/enable_hba" default "off" as "enable_hba" \
+    string "pgpool/authentication_timeout" default "30" as "authentication_timeout" \
+    string "pgpool/ssl" default "off" as "ssl" \
+    string "pgpool/children" default "32" as "children" \
+    string "pgpool/max_pool" default "4" as "max_pool" \
+    string "pgpool/log_destination" default "syslog" as "log_destination" \
+    string "pgpool/print_timestamp" default "on" as "print_timestamp" \
+    string "pgpool/log_connections" default "on" as "log_connections" \
+    string "pgpool/log_hostname" default "on" as "log_hostname" \
+    string "pgpool/log_statement" default "off" as "log_statement" \
+    string "pgpool/log_per_node_statement" default "off" as "log_per_node_statement" \
+    string "pgpool/log_standby_delay" default "none" as "log_standby_delay" \
+    string "pgpool/syslog_facility" default "LOCAL0" as "syslog_facility" \
+    string "pgpool/syslog_ident" default "pgpool" as "syslog_ident" \
+    string "pgpool/debug_level" default "0" as "debug_level" \
+    string "pgpool/status_path" default "/var/run/pgpool" as "status_path" \
+    string "pgpool/connection_cache" default "on" as "connection_cache" \
+    string "pgpool/reset_query_list" default "ABORT; DISCARD ALL" as "reset_query_list" \
+    string "pgpool/replication_mode" default "off" as "replication_mode" \
+    string "pgpool/replicate_select" default "off" as "replicate_select" \
+    string "pgpool/insert_lock" default "on" as "insert_lock" \
+    string "pgpool/lobj_lock_table" default "" as "lobj_lock_table" \
+    string "pgpool/replication_stop_on_mismatch" default "off" as "replication_stop_on_mismatch" \
+    string "pgpool/failover_if_affected_tuples_mismatch" default "off" as "failover_if_affected_tuples_mismatch" \
+    string "pgpool/load_balance_mode" default "off" as "load_balance_mode" \
+    string "pgpool/ignore_leading_white_space" default "on" as "ignore_leading_white_space" \
+    string "pgpool/white_function_list" default "" as "white_function_list" \
+    string "pgpool/black_function_list" default "nextval,setval" as "black_function_list" \
+    string "pgpool/master_slave_mode" default "off" as "master_slave_mode" \
+    string "pgpool/master_slave_sub_mode" default "stream" as "master_slave_sub_mode" \
+    string "pgpool/sr_check_period" default "0" as "sr_check_period" \
+    string "pgpool/sr_check_user" default "nobody" as "sr_check_user" \
+    string "pgpool/sr_check_password" default "" as "sr_check_password" \
+    string "pgpool/delay_threshold" default "0" as "delay_threshold" \
+    string "pgpool/follow_master_command" default "" as "follow_master_command" \
+    string "pgpool/parallel_mode" default "off" as "parallel_mode" \
+    string "pgpool/enable_query_cache" default "off" as "enable_query_cache" \
+    string "pgpool/pgpool2_hostname" default "" as "pgpool2_hostname" \
+    string "pgpool/system_db_hostname" default "localhost" as "system_db_hostname" \
+    string "pgpool/system_db_port" default "5432" as "system_db_port" \
+    string "pgpool/system_db_dbname" default "pgpool" as "system_db_dbname" \
+    string "pgpool/system_db_schema" default "pgpool_catalog" as "system_db_schema" \
+    string "pgpool/system_db_user" default "pgpool" as "system_db_user" \
+    string "pgpool/system_db_password" default "" as "system_db_password" \
+    string "pgpool/health_check_period" default "0" as "health_check_period" \
+    string "pgpool/health_check_timeout" default "20" as "health_check_timeout" \
+    string "pgpool/health_check_user" default "nobody" as "health_check_user" \
+    string "pgpool/health_check_password" default "" as "health_check_password" \
+    string "pgpool/failover_command" default "" as "failover_command" \
+    string "pgpool/failback_command" default "" as "failback_command" \
+    string "pgpool/fail_over_on_backend_error" default "on" as "fail_over_on_backend_error" \
+    string "pgpool/recovery_user" default "nobody" as "recovery_user" \
+    string "pgpool/recovery_password" default "" as "recovery_password" \
+    string "pgpool/recovery_1st_stage_command" default "" as "recovery_1st_stage_command" \
+    string "pgpool/recovery_2nd_stage_command" default "" as "recovery_2nd_stage_command" \
+    string "pgpool/recovery_timeout" default "90" as "recovery_timeout" \
+    string "pgpool/client_idle_limit_in_recovery" default "0" as "client_idle_limit_in_recovery" \
+    string "pgpool/relcache_expire" default "0" as "relcache_expire" \
+    string "pgpool/hba_configuration" default "" as "hba_configuration" \
+    string "pgpool/pcp_configuration" default "" as "pcp_configuration"
+}
+
