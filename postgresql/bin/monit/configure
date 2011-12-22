@@ -7,7 +7,7 @@ paths create "/etc/monit.d/"
 template install "postgresql/monitrc" \
   to "/etc/monit.d/postgresql.monitrc" \
   mode 0644 \
-  variables ${postgresql_defaults}
+  variables from postgresql_defaults
 
 if command exists monit
 then exec monit reload ; fi

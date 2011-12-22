@@ -13,5 +13,5 @@ then
   template install "repmgr/repmgr.conf" \
     to "/etc/postgresql/repmgr.conf" \
     mode 0644 \
-    variables ${repmgr_defaults}
+    variables from repmgr_defaults
 fi
