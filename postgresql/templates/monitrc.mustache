@@ -1,7 +1,7 @@
 check process postgres with pidfile {{service_pid_file}}
   group database
-  start program = "/etc/init.d/postgresql start"
-  stop  program = "/etc/init.d/postgresql stop"
+  start program = "sm postgresql start"
+  stop  program = "sm postgresql start"
   if failed unixsocket /var/run/postgresql/.s.PGSQL.{{port}} protocol pgsql
      then restart
   if failed host {{bind}} port {{port}} protocol pgsql then restart

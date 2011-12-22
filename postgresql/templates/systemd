@@ -6,8 +6,8 @@ After=network.target
 [Service]
 Type=forking
 
-User=postgres
-Group=postgres
+User={{service_user}}
+Group={{service_user}}
 
 # Note: avoid inserting whitespace in these Environment= lines, or you may
 # break postgresql-setup.

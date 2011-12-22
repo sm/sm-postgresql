@@ -7,7 +7,7 @@ WAIT_FOR_START="-w"
 WAIT_FOR_STOP="-w"
 
 # How long to wait for server to start in seconds
-START_TIMEOUT=60
+START_TIMEOUT={{start_timeout}}
 
 # Ignore new connections and wait for clients to disconnect from server before
 # shutting down.
