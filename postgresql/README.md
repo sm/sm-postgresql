@@ -102,9 +102,3 @@ On each replica server run:
 
     sm postgresql replication configure master postgres@{{master}}
 
-You will need to ensure that the postgres user can ssh to and from each host.
-
-If you require a customized ssh port you can specify as follows:
-
-    sm postgresql replication configure master postgres@{{master}} ssh_port 1234
-
