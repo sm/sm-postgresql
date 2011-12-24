@@ -9,7 +9,7 @@ In order to install the latest version of PostgreSQL known to the component do:
 
 Initialize the PostgreSQL database as the postgres user:
 
-    su - postgres -c 'sm postgresql initialize'
+    sm postgresql initialize
 
 Configure the sytem to run PostgreSQL:
 
