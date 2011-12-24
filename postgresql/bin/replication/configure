@@ -12,12 +12,14 @@ fi
 if variable is empty master
 then
   log error "The master hostname (dns resolvable) or IP address must be given as 'master X'"
-elif variable is empty replica
-then
-  log error "The replica hostname (dns resolvable) or IP address must be given as 'replica X'"
 fi
 
 sm postgresql stop || true # if already stopped we're good to go.
+
+path remove ${service_data_path}
+
+pg_basebackup -D ${service_data_path} -Fp -c fast -l replication-$HOSTNAME -v -P \
+  -U ${service_user} -h ${master} -p ${master_port:-5432}
 
 template install "postgresql/recovery.conf" \
   to "${service_data_path}/recovery.conf" \
@@ -29,26 +31,5 @@ template install "postgresql/recovery.conf" \
   password "${password}" \
   data_path "${service_data_path}"
 
-eval "ssh ${ssh_options} ${user}@${master} \"hostname;ssh ${ssh_options} ${USER}@${replica} hostname\""
-
-files remove "${service_data_path}/wal/*"
-
-eval "ssh ${ssh_options} ${user}@${master} \"psql -d postgres -c \\\"SELECT pg_start_backup('$(date)');\\\"\""
-
-touch "${service_data_path}/wal/00000001.history"
-
-eval "rsync -avPz --delete -e \"ssh ${ssh_options}\" --exclude .svn --exclude .git --exclude .hg --exclude pg_log --exclude 'recovery.*' --exclude postgresql.conf --exclude pg_xlog ${user}@${master}:${service_data_path}/ ${service_data_path}/ "
-
-find "${service_data_path}/pg_xlog" -type f -exec rm -f {} \;
-
 sm postgresql start
-
-sleep 2
-
-eval "ssh ${ssh_options} ${user}@${master} \"psql -d postgres -c \\\"SELECT pg_stop_backup();\\\"\""
-
-if file exists "${sm_data_path}/backup_label"
-then
-  file remove "${sm_data_path}/backup_label"
-fi
 
