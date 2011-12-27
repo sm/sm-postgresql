@@ -13,7 +13,6 @@ ruby_string=ruby-1.9.3-p0
 if ! file is executable /usr/local/rvm/wrappers/${ruby_string}/ruby
 then /usr/local/rvm/bin/rvm install ${ruby_string} ; fi
 
-/usr/local/rvm/wrappers/${ruby_string}/ruby -S gem install
 case ${ruby_string} in
   (jruby-*)
     /usr/local/rvm/wrappers/${ruby_string}/ruby -S \
