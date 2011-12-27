@@ -2,12 +2,21 @@
 
 rubyrep_initialize()
 {
-  make_command="true"
-  make_install_command="true"
+  build_command="true"
+  install_command="true"
 }
 
 rubyrep_configure()
 {
-  true
+  if ! file is executable "/usr/local/rvm/wrappers/jruby-1.6.5/ruby"
+  then sm rubyrep jruby install ; fi
 }
 
+rubyrep_install()
+{
+  "/usr/local/rvm/wrappers/jruby-1.6.5/ruby" \
+    "${sm_path}/src/rubyrep-${package_version}/setup.rb" \
+    -- --prefix "${sm_path}/pkg/versions/rubyrep/${package_version}"
+
+  package activate name repmgr version ${package_version}
+}

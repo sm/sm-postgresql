@@ -1,4 +1,4 @@
 #!/bin/sh
 
-exec rubyrep uninstall -c ${conf_file}
+exec /usr/local/rvm/wrappers/jruby-1.6.5/ruby -S rubyrep uninstall -c ${conf_file}
 

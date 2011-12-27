@@ -1,6 +1,6 @@
 #!/bin/sh
 
-typeset -g config_file
+typeset -g config_file make_command make_install_command
 
 config_file="/etc/rubyrep/replication.conf"
 
