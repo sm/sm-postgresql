@@ -2,21 +2,22 @@
 
 rubyrep_initialize()
 {
+  trace_filter rubyrep || set +o xtrace
+
   build_command="true"
   install_command="true"
 }
 
 rubyrep_configure()
 {
-  if ! file is executable "/usr/local/rvm/wrappers/jruby-1.6.5/ruby"
-  then sm rubyrep jruby install ; fi
+  true
 }
 
 rubyrep_install()
 {
-  "/usr/local/rvm/wrappers/jruby-1.6.5/ruby" -S \
-    "${sm_path}/src/rubyrep-${package_version}/setup.rb" > install.log 2>&1
-    # --prefix "${sm_path}/pkg/versions/rubyrep/${package_version}"
+  trace_filter rubyrep || set +o xtrace
+
+  ./jruby/bin/jruby setup.rb all --prefix=/opt/sm/pkg/versions/rubyrep/1.2.0 > install.log 2>&1
 
   package activate name "rubyrep" version ${package_version}
 }
