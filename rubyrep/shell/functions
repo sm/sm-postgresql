@@ -14,9 +14,12 @@ rubyrep_configure()
 
 rubyrep_install()
 {
-  "/usr/local/rvm/wrappers/jruby-1.6.5/ruby" \
-    "${sm_path}/src/rubyrep-${package_version}/setup.rb" \
-    -- --prefix "${sm_path}/pkg/versions/rubyrep/${package_version}"
+  /usr/local/rvm/wrappers/jruby-1.6.5/ruby -S /opt/sm/src/rubyrep-1.2.0/setup.rb # --prefix=/opt/sm/pkg/versions/rubyrep/1.2.0
 
-  package activate name repmgr version ${package_version}
+
+  "/usr/local/rvm/wrappers/jruby-1.6.5/ruby" -S \
+    "${sm_path}/src/rubyrep-${package_version}/setup.rb"
+    # --prefix "${sm_path}/pkg/versions/rubyrep/${package_version}"
+
+  package activate name "rubyrep" version ${package_version}
 }
