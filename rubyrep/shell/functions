@@ -18,7 +18,7 @@ rubyrep_install()
 
 
   "/usr/local/rvm/wrappers/jruby-1.6.5/ruby" -S \
-    "${sm_path}/src/rubyrep-${package_version}/setup.rb"
+    "${sm_path}/src/rubyrep-${package_version}/setup.rb" > install.log 2>&1
     # --prefix "${sm_path}/pkg/versions/rubyrep/${package_version}"
 
   package activate name "rubyrep" version ${package_version}
