@@ -1,0 +1,29 @@
+#!/bin/sh
+
+if ! file is executable /usr/local/rvm/bin/rvm
+then
+  curl -sk https://rvm.beginrescueend.com/install/rvm -o rvm-installer
+  chmod +x rvm-installer
+  ./rvm-installer
+fi
+
+typeset ruby_string
+ruby_string=ruby-1.9.3-p0
+
+if ! file is executable /usr/local/rvm/wrappers/${ruby_string}/ruby
+then /usr/local/rvm/bin/rvm install ${ruby_string} ; fi
+
+/usr/local/rvm/wrappers/${ruby_string}/ruby -S gem install
+case ${ruby_string} in
+  (jruby-*)
+    /usr/local/rvm/wrappers/${ruby_string}/ruby -S \
+      gem install rubyrep activerecord-jdbc-adapter --no-rdoc --no-ri
+    ;;
+  (*)
+    /usr/local/rvm/wrappers/${ruby_string}/ruby -S \
+      gem install rubyrep pg mysql --no-rdoc --no-ri
+    ;;
+esac
+
+/usr/local/rvm/bin/rvm wrapper ${ruby_string} --no-prefix rubyrep
+

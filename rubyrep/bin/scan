@@ -1,4 +1,4 @@
 #!/bin/sh
 
-exec /usr/local/rvm/wrappers/jruby-1.6.5/ruby -S rubyrep scan -c ${config_file}
+exec /usr/local/rvm/bin/rubyrep scan -c ${config_file}
 
