@@ -1,10 +1,14 @@
 #!/bin/sh
 
-curl -sk https://rvm.beginrescueend.com/install/rvm -o rvm-installer
-chmod +x rvm-installer
-./rvm-installer
+if ! file is executable /usr/local/rvm/bin/rvm
+then
+  curl -sk https://rvm.beginrescueend.com/install/rvm -o rvm-installer
+  chmod +x rvm-installer
+  ./rvm-installer
+fi
 
-/usr/local/rvm/bin/rvm install jruby-1.6.5
+if ! file is executable /usr/local/rvm/wrappers/jruby-1.6.5/ruby
+then /usr/local/rvm/bin/rvm install jruby-1.6.5 ; fi
 
 /usr/local/rvm/wrappers/jruby-1.6.5/ruby -S gem install activerecord -v 3.0.11
 /usr/local/rvm/wrappers/jruby-1.6.5/ruby -S gem install activerecord-jdbc-adapter -v 1.2.1
