@@ -14,9 +14,6 @@ rubyrep_configure()
 
 rubyrep_install()
 {
-  /usr/local/rvm/wrappers/jruby-1.6.5/ruby -S /opt/sm/src/rubyrep-1.2.0/setup.rb # --prefix=/opt/sm/pkg/versions/rubyrep/1.2.0
-
-
   "/usr/local/rvm/wrappers/jruby-1.6.5/ruby" -S \
     "${sm_path}/src/rubyrep-${package_version}/setup.rb" > install.log 2>&1
     # --prefix "${sm_path}/pkg/versions/rubyrep/${package_version}"
