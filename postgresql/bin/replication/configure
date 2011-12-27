@@ -31,5 +31,8 @@ template install "postgresql/recovery.conf" \
   password "${password}" \
   data_path "${service_data_path}"
 
+file replace regex "^.*hot_standby.*=.*$" with "hot_standby = on" \
+  in "${service_data_path}/postgresql.conf"
+
 sm postgresql start
 

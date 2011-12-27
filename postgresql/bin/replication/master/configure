@@ -1,9 +1,18 @@
 #!/bin/sh
 
-if [[ "${USER}" != "${service_user}" ]]
+if user is root
+then
+  exec /bin/su - ${service_user} -c "sm postgresql replication setup master '${master}' ${extension_args[*]}"
+elif [[ "${USER}" != "${service_user}" ]]
 then
   log fail "'replication configure' may only be run as the PosgreSQL user '${service_user}'"
 fi
 
 # TODO: configure the master's {postgresql,pg_hba}.conf for replication.
+
+if variable is nonempty replica && ! file contains string "${master}"
+then
+  file append string "host all ${service_user} ${replica}/32 trust" \
+    to "${service_data_path}/postgresql.conf"
+fi
 
