@@ -1,0 +1,13 @@
+#!/bin/sh
+
+rubyrep_initialize()
+{
+  make_command="true"
+  make_install_command="true"
+}
+
+rubyrep_configure()
+{
+  true
+}
+

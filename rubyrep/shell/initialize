@@ -1,0 +1,6 @@
+#!/bin/sh
+
+typeset -g config_file
+
+config_file="/etc/rubyrep/replication.conf"
+
