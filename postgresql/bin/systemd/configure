@@ -5,9 +5,15 @@ user is root || log error "'postgresql configure system' may only be run as root
 if path exists "/lib/systemd/system"
 then
   template install "postgresql/systemd" \
-    to "/lib/systemd/system/postgresql.service" \
-    mode 0644 \
-    variables from postgresql_defaults
+    to "/lib/systemd/system/postgresql-${package_version}.service" \
+    mode 0644 variables from postgresql_defaults
+
+  systemctl enable postgresql-${package_version}.service
+  systemctl --system daemon-reload
+
+  # This file should *not* be there.
+  if file exists "/etc/rc.d/init.d/postgresql"
+  then file remove "/etc/rc.d/init.d/postgresql" ; fi
 else
   log error "systemd path /lib/systemd/system is missing, is systemd installed?"
 fi

@@ -1,10 +1,11 @@
 [Unit]
-Description=PostgreSQL database server
+Description=PostgreSQL {{version}} Database Cluster
 After=syslog.target
 After=network.target
 
 [Service]
-Type=forking
+# Simple since postgres is the postmaster process and does not fork and exit.
+Type=simple
 
 User={{service_user}}
 Group={{service_user}}
@@ -25,7 +26,7 @@ StandardOutput=syslog
 # Disable OOM kill on the postmaster
 OOMScoreAdjust=-1000
 
-ExecStart={{service_bin_path}}/pg_ctl start -D {{service_data_path}} -s -o "-p {{port}}" -w -t {{start_timeout}}
+ExecStart={{service_bin_path}}/postgres -p ${PGPORT} -D ${PGDATA} -c silent_mode=off -c log_destination=syslog
 ExecStop={{service_bin_path}}/pg_ctl stop -D {{service_data_path}} -s -m fast
 ExecReload={{service_bin_path}}/pg_ctl reload -D {{service_data_path}} -s
 
