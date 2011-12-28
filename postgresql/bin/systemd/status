@@ -1,7 +1,5 @@
 #!/bin/sh
 
-user is root || log error "'postgresql configure system' may only be run as root."
-
 if command exists systemctl
 then
   exec systemctl status postgresql-${version}.service

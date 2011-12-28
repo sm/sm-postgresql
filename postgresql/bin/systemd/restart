@@ -1,6 +1,6 @@
 #!/bin/sh
 
-user is root || log error "'postgresql configure system' may only be run as root."
+user is root || log error "'postgresql systemd restart' may only be run as root."
 
 if command exists systemctl
 then
