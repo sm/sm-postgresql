@@ -4,6 +4,8 @@ user is root || log error "'postgresql configure system' may only be run as root
 
 if path exists "/lib/systemd/system"
 then
+  postgresql_defaults
+
   template install "postgresql/systemd" \
     to "/lib/systemd/system/postgresql-${package_version}.service" \
     mode 0644 variables from postgresql_defaults
