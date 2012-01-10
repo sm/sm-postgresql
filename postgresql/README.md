@@ -83,7 +83,7 @@ If you wish to setup replication, first perform Installation and Configuration
 on both the master and replica servers.
 
 Next ensure that the pg\_hba.conf on master has a replication line configured
-for the relpica(s) you will use. So for example if I have one replica
+for the replica(s) you will use. So for example if I have one replica
 with IP address 10.0.5.212 then I would put an entry as follows
 
     host    replication     postgres        10.0.5.212/32            trust
