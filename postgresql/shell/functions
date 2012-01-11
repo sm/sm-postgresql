@@ -123,7 +123,7 @@ postgresql_defaults()
 postgresql_initialize()
 {
   trace_filter postgresql || set +o xtrace
-  trace_filter postgresql || set -o xtrace
+
   local _action
 
   postgresql_defaults
