@@ -8,7 +8,5 @@ then # re-execute this extension as the service user.
   exec su - ${service_user:-"postgres"} -c "${sm_path}/bin/sm postgresql initialize ${extension_args[*]}"
 fi
 
-ssh-keygen -t rsa -b 2048 -f ~/.ssh/id_replication -N '' -C "$HOSTNAME key"
-
 postgresql_database_initialize
 
