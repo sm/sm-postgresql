@@ -5,3 +5,4 @@ api/service
 api/database
 api/user
 api/json
+api/os

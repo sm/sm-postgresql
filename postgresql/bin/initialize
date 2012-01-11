@@ -5,7 +5,7 @@ user is root || user is "${service_user:-"postgres"}" ||
 
 if user is root
 then # re-execute this extension as the service user.
-  exec /bin/su - ${service_user:-"postgres"} -c "${sm_path}/bin/sm postgresql initialize ${extension_args[*]}"
+  exec su - ${service_user:-"postgres"} -c "${sm_path}/bin/sm postgresql initialize ${extension_args[*]}"
 fi
 
 ssh-keygen -t rsa -b 2048 -f ~/.ssh/id_replication -N '' -C "$HOSTNAME key"
