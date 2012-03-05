@@ -85,7 +85,7 @@ postgresql_defaults()
   config read file "defaults" key "version" prefix "package" from "postgresql"
   service_data_path="/var/db/postgresql/${package_version}/data"
 
-  json get from ${json_file} \
+  json get from ${json_uri} \
     into "postgresql_defaults" \
     string "postgresql/version" default "${package_version}" as "version" \
     string "postgresql/bind" default 0.0.0.0 as "bind" \
