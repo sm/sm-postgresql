@@ -50,11 +50,6 @@ postgresql_cli()
         if variable is empty user
         then log error "The system user name of PostgreSQL on the master server must be specified after keyword 'user'" ; fi
         ;;
-      (json_file)
-        array shift extension_args into json_file
-        if variable is empty json_file
-        then log error "A JSON file name to read configuration values from must be specified after keyword 'json_file'" ; fi
-        ;;
       (*)
         if variable is nonempty token
         then
