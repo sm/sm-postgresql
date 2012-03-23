@@ -93,7 +93,7 @@ postgresql_defaults()
     string "postgresql/syslog/facility" default "local0" as "syslog_facility"\
     string "postgresql/max/clients" default 128 as "max_clients" \
     string "postgresql/max/memory" default "128mb" as "max_memory" \
-    string "postgresql/max/slow" default 1024 as "max_sloq" \
+    string "postgresql/max/slow" default 1024 as "max_slow" \
     string "postgresql/log/slow" default 10000 as "log_slow" \
     string "postgresql/service/bin_path" as "service_bin_path" default "${sm_path}/pkg/versions/postgresql/${package_version}/bin" \
     string "postgresql/service/pid_file" as "service_pid_file" default "/var/run/postgresql/postgresql.pid" \
