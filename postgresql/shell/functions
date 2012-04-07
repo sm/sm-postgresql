@@ -85,6 +85,8 @@ postgresql_defaults()
   config read file "defaults" key "version" prefix "package" from "postgresql"
   service_data_path="/var/db/postgresql/${package_version}/data"
 
+  [[ -n "${json_uri}" ]] || json_uri="${extension_path}/config/defaults.json"
+
   json get from ${json_uri} \
     into "postgresql_defaults" \
     string "postgresql/version" default "${package_version}" as "version" \
