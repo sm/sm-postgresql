@@ -1,5 +1,16 @@
 #!/bin/sh
 
+user is root || log fail 'pgpool configure must be run as root.'
+
+path enter ${source_path}
+# download
+cd /incoming/
+tar -xzf pgpool-II-2.1.tar.gz
+cd pgpool-II-2.1/
+./configure \
+--prefix=/opt/pgpoolII \ --with-pgsql-libdir=/usr/lib64/ \ --with-pgsql-includedir=/usr/include/pgsql/ make && make install
+chown -R ${service_user}:${service_user} /opt/pgpoolII]
+
 for template in pcp pgpool pool_hba
 do
   template install "${extension}/${template}.conf" \
