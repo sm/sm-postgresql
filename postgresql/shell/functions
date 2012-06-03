@@ -80,7 +80,8 @@ postgresql_defaults()
   fi
 
   if [[ ${service_user} == "postgresql" ]]
-  then service_user="postgres" ; fi
+  then service_user="postgres"
+  fi
 
   config read file "defaults" key "version" prefix "package" from "postgresql"
   service_data_path="/var/db/postgresql/${package_version}/data"
@@ -176,10 +177,12 @@ postgresql_database_initialize()
     if user is root
     then
       if ! su - "${service_user}" -c "${_command}"
-      then __sm.log.warn "initdb failed, command:\n${_command}" ; fi
+      then __sm.log.warn "initdb failed, command:\n${_command}"
+      fi
     else
       if ! eval "${_command}"
-      then __sm.log.warn "initdb failed, command:\n${_command}" ; fi
+      then __sm.log.warn "initdb failed, command:\n${_command}"
+      fi
     fi
   fi
 
@@ -188,7 +191,8 @@ postgresql_database_initialize()
     for _dir in archives wal
     do
       if ! path exists "${service_data_path}/${_dir}"
-      then paths create "${service_data_path}/${_dir}" ; fi
+      then paths create "${service_data_path}/${_dir}"
+      fi
     done
   fi
 

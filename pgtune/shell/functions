@@ -1,0 +1,23 @@
+#!/bin/sh
+
+pgtune_configure()
+{
+  : # nothing to do, pgtune is a script.
+}
+
+pgtune_build()
+{
+  : # nothing to do, pgtune is a script.
+}
+
+pgtune_install()
+{
+  file copy from "${source_path}/pgtune" to "${install_path}/bin/pgtune"
+
+  paths create "${install_path}/bin"
+
+  log "#installing ${package_name} ${package_version}...\n"
+
+  install -b "pgtune" "${install_path}/bin/pgtune"
+}
+
