@@ -98,7 +98,7 @@ postgresql_defaults()
     string "postgresql/max/slow" default 1024 as "max_slow" \
     string "postgresql/log/slow" default 10000 as "log_slow" \
     string "postgresql/service/bin_path" as "service_bin_path" default "${sm_path}/pkg/versions/postgresql/${package_version}/bin" \
-    string "postgresql/service/pid_file" as "service_pid_file" default "/var/run/postgresql/postgresql.pid" \
+    string "postgresql/service/pid_file" as "service_pid_file" default "/var/run/postgresql.pid" \
     string "postgresql/service/config_file" as "service_config_file" default "/etc/postgresql/postgresql.conf" \
     string "postgresql/service/log_file" as "service_log_file" default "/var/log/postgresql/postgresql.log" \
     string "postgresql/service/user" as "service_user" default "${service_user}" \
@@ -112,7 +112,8 @@ postgresql_defaults()
     string "postgresql/wal/keep_segments" as "wal_keep_segments" default "20" \
     string "postgresql/checkpoint/segments" as "checkpoint_segments" default "100" \
     string "postgresql/effective_cache_size" as "effective_cache_size" default "512MB" \
-    string "postgresql/shared_buffers" as "shared_buffers" default "1GB"
+    string "postgresql/shared_buffers" as "shared_buffers" default "1GB" \
+    string "postgresql/unix_socket_directory" as "unix_socket_directory" default "/tmp"
 
   PGDATA="${service_data_path}"
 }
@@ -235,3 +236,42 @@ postgresql_uninstall()
   log "Removal of ${package_name} complete."
 }
 
+postgresql_configure_shm()
+{
+
+  # Full memory requirement calculations:
+  # typeset max_locks_per_transaction max_connections autovacuum_max_workers \
+  #   max_prepared_transactions block_size wal_block_size wal_buffers
+
+  # Defaults:
+  #   max_locks_per_transaction=64
+  #   max_connections=100
+  #   autovacuum_max_workers=3
+  #   max_prepared_transactions=0
+  #   block_size=8192
+  #   wal_block_size=8192
+  #   wal_buffers=8
+
+  # Formulas:
+  # connections=$(expr (1800 + 270 \* ${max_locks_per_transaction}) \* (${max_connections} + ${autovacuum_max_workers}))
+  # prepared_transactions=$(expr	(770 + 270 \* ${max_locks_per_transaction}) \* ${max_prepared_transactions})
+  # shared_disk_buffers=$(expr	(${block_size} + 208) \* ${shared_buffers})
+  # total_wal_buffers=$(expr	(${wal_block_size} + 8) \* ${wal_buffers})
+  # fixed_space_requirements=770 # kB
+
+  if command exists getconf
+  then # setup shm using getconf
+    typeset page_size physical_pages
+    page_size=$(getconf PAGE_SIZE)
+    physical_pages=$(getconf _PHYS_PAGES)
+    shmall=$(${physical_pages}/2)
+    shmmax=$(expr ${shmall} \* ${page_size})
+    if ! file contains string 'kernel.shmmax' /etc/sysctl.conf
+    then file write append string "kernel.shmmax = ${shmmax}\n" to /etc/sysctl.conf
+    fi
+    if ! file contains string 'kernel.shmall' /etc/sysctl.conf
+    then file write append string "kernel.shmall = ${shmall}\n" to /etc/sysctl.conf
+    fi
+    sysctl -p /etc/sysctl.conf
+  fi
+}

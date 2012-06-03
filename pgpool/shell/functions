@@ -124,7 +124,7 @@ pgpool_defaults()
     string "pgpool/syslog_facility" default "LOCAL0" as "syslog_facility" \
     string "pgpool/syslog_ident" default "pgpool" as "syslog_ident" \
     string "pgpool/debug_level" default "0" as "debug_level" \
-    string "pgpool/status_path" default "/var/run/pgpool" as "status_path" \
+    string "pgpool/status_path" default "/var/run" as "status_path" \
     string "pgpool/connection_cache" default "on" as "connection_cache" \
     string "pgpool/reset_query_list" default "ABORT; DISCARD ALL" as "reset_query_list" \
     string "pgpool/replication_mode" default "off" as "replication_mode" \

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 paths create owner "${service_user:-"postgres"}" \
-  "/etc/pgbouncer" "/var/log/pgbouncer" "/var/run/pgbouncer"
+  "/etc/pgbouncer" "/var/log/pgbouncer"
 
 for template in pgbouncer.ini userlist.txt
 do
