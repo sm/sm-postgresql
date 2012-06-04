@@ -268,7 +268,7 @@ postgresql_configure_shm()
     typeset page_size physical_pages
     page_size=$(getconf PAGE_SIZE)
     physical_pages=$(getconf _PHYS_PAGES)
-    shmall=$(${physical_pages}/2)
+    shmall=$(expr ${physical_pages} / 2)
     shmmax=$(expr ${shmall} \* ${page_size})
     if ! file contains string 'kernel.shmmax' /etc/sysctl.conf
     then file write append string "kernel.shmmax = ${shmmax}\n" to /etc/sysctl.conf
