@@ -242,6 +242,7 @@ postgresql_uninstall()
 
 postgresql_configure_shm()
 {
+  os is linux || return 0
 
   # Full memory requirement calculations:
   # typeset max_locks_per_transaction max_connections autovacuum_max_workers \
@@ -263,19 +264,19 @@ postgresql_configure_shm()
   # total_wal_buffers=$(expr	(${wal_block_size} + 8) \* ${wal_buffers})
   # fixed_space_requirements=770 # kB
 
-  if command exists getconf
-  then # setup shm using getconf
-    typeset page_size physical_pages
-    page_size=$(getconf PAGE_SIZE)
-    physical_pages=$(getconf _PHYS_PAGES)
-    shmall=$(expr ${physical_pages} / 2)
-    shmmax=$(expr ${shmall} \* ${page_size})
-    if ! file contains string 'kernel.shmmax' /etc/sysctl.conf
-    then file write append string "kernel.shmmax = ${shmmax}\n" to /etc/sysctl.conf
-    fi
-    if ! file contains string 'kernel.shmall' /etc/sysctl.conf
-    then file write append string "kernel.shmall = ${shmall}\n" to /etc/sysctl.conf
-    fi
-    sysctl -p /etc/sysctl.conf
+  command exists getconf || return 0
+
+  typeset page_size physical_pages
+  page_size=$(getconf PAGE_SIZE)
+  physical_pages=$(getconf _PHYS_PAGES)
+  shmall=$(expr ${physical_pages} / 2)
+  shmmax=$(expr ${shmall} \* ${page_size})
+  if ! file contains string 'kernel.shmmax' /etc/sysctl.conf
+  then file write append string "kernel.shmmax = ${shmmax}\n" to /etc/sysctl.conf
   fi
+  if ! file contains string 'kernel.shmall' /etc/sysctl.conf
+  then file write append string "kernel.shmall = ${shmall}\n" to /etc/sysctl.conf
+  fi
+  sysctl -w kernel.shmmax="${shmmax}"
+  sysctl -w kernel.shmall="${shmall}"
 }
