@@ -266,7 +266,7 @@ postgresql_configure_shm()
 
   command exists getconf || return 0
 
-  typeset page_size physical_pages
+  typeset page_size physical_pages shmmax shmall
   page_size=$(getconf PAGE_SIZE)
   physical_pages=$(getconf _PHYS_PAGES)
   shmall=$(expr ${physical_pages} / 2)
