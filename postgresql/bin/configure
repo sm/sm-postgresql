@@ -28,8 +28,6 @@ do
   fi
 done
 
-ln -fs "/var/run/postgresql/.s.PGSQL.5432" "/tmp/.s.PGSQL.5432"
-
 path chown "$service_user:$service_user" recursively "${service_data_path}"
 path chmod 0700 recursively "${service_data_path}"
 
