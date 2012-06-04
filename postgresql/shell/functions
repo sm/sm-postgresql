@@ -94,8 +94,8 @@ postgresql_defaults()
     string "postgresql/bind" default 0.0.0.0 as "bind" \
     string "postgresql/port" default 5432 as "port" \
     string "postgresql/syslog/facility" default "local0" as "syslog_facility"\
-    string "postgresql/max/clients" default 128 as "max_clients" \
-    string "postgresql/max/memory" default "128mb" as "max_memory" \
+    string "postgresql/max/clients" default 80 as "max_clients" \
+    string "postgresql/max/memory" default "128MB" as "max_memory" \
     string "postgresql/max/slow" default 1024 as "max_slow" \
     string "postgresql/log/slow" default 10000 as "log_slow" \
     string "postgresql/service/bin_path" as "service_bin_path" default "${sm_path}/pkg/versions/postgresql/${package_version}/bin" \
@@ -107,13 +107,13 @@ postgresql_defaults()
     string "postgresql/start/timeout" as "start_timeout" default "300" \
     string "postgresql/replication/master" as "master" default "${master:-localhost}" \
     string "postgresql/replication/replica" as "replica" default "" \
-    string "postgresql/wal/buffers" as "wal_buffers" default "8MB" \
+    string "postgresql/wal/buffers" as "wal_buffers" default "16MB" \
     string "postgresql/wal/writer_delay" as "wal_writer_delay" default "200ms" \
     string "postgresql/wal/max_senders" as "wal_max_senders" default "5" \
     string "postgresql/wal/keep_segments" as "wal_keep_segments" default "20" \
     string "postgresql/checkpoint/segments" as "checkpoint_segments" default "100" \
     string "postgresql/effective_cache_size" as "effective_cache_size" default "512MB" \
-    string "postgresql/shared_buffers" as "shared_buffers" default "1GB" \
+    string "postgresql/shared_buffers" as "shared_buffers" default "128MB" \
     string "postgresql/unix_socket_directory" as "unix_socket_directory" default "/tmp"
 
   PGDATA="${service_data_path}"
