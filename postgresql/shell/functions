@@ -84,7 +84,10 @@ postgresql_defaults()
   fi
 
   config read file "defaults" key "version" prefix "package" from "postgresql"
-  service_data_path="/var/db/postgresql/${package_version}/data"
+
+  major_minor_version=$(echo ${package_version} | sed 's/\.[0-9]*$//' )
+
+  service_data_path="/var/db/postgresql/${major_minor_version}/data"
 
   [[ -n "${json_uri}" ]] || json_uri="${extension_path}/config/defaults.json"
 
