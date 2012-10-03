@@ -7,9 +7,28 @@ typeset name
 
 for name in ${extension_args}
 do
-  path enter "${sm_path}/src/postgresql-${package_version}/contrib/${name}"
-  make all install &&
-  "${sm_path}/pkg/active/bin/psql" -U ${service_user} postgres \
-    -c "CREATE EXTENSION IF NOT EXISTS ${name};"
+  case ${name} in
+    (plsh)
+      if path exists "${sm_path}/src/postgresql-${package_version}/contrib/${name}"
+      then
+        path enter "${sm_path}/src/postgresql-${package_version}/contrib/${name}"
+        git reset --hard HEAD
+        git pull origin master
+      else
+        git clone git://github.com/petere/plsh.git \
+          "${sm_path}/src/postgresql-${package_version}/contrib/${name}"
+      fi
+      ;;
+  esac
+
+  if path exists "${sm_path}/src/postgresql-${package_version}/contrib/${name}"
+  then
+    path enter "${sm_path}/src/postgresql-${package_version}/contrib/${name}"
+    make all install &&
+      "${sm_path}/pkg/active/bin/psql" -U ${service_user} postgres \
+      -c "CREATE EXTENSION IF NOT EXISTS ${name};"
+  else
+    log error "Extension does not exist in ${sm_path}/src/postgresql-${package_version}/contrib/${name}, unable to install."
+  fi
 done
 
