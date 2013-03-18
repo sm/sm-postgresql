@@ -29,7 +29,7 @@ do
         git clone git://github.com/aggregateknowledge/postgresql-hll.git \
           "${sm_path}/src/postgresql-${package_version}/contrib/${name}"
       fi
-      file replace regex "^.*PG_CONFIG.*=.*$" with "PG_CONFIG = ${sm_path}/pkg/active/bin/pg_config" \
+      file replace regex "^.*PG_CONFIG.*=.*$" with "PG_CONFIG = ${sm_path}/pkg/active/bin/pg_config" in Makefile
       ;;
   esac
 
