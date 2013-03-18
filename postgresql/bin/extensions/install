@@ -19,6 +19,17 @@ do
           "${sm_path}/src/postgresql-${package_version}/contrib/${name}"
       fi
       ;;
+    (hll)
+      if path exists "${sm_path}/src/postgresql-${package_version}/contrib/${name}"
+      then
+        path enter "${sm_path}/src/postgresql-${package_version}/contrib/${name}"
+        git reset --hard HEAD
+        git pull origin master
+      else
+        git clone git://github.com/aggregateknowledge/postgresql-hll.git \
+          "${sm_path}/src/postgresql-${package_version}/contrib/${name}"
+      fi
+      ;;
   esac
 
   if path exists "${sm_path}/src/postgresql-${package_version}/contrib/${name}"
