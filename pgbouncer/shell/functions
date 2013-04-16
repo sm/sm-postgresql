@@ -6,7 +6,6 @@ pgbouncer_initialize()
 
   # TODO: detect the version installed in SM...?
   postgresql_version="$(psql -V | head -1 | awk '{print $NF}')"
-
   package_version=$(pgbouncer_versions_latest)
   package_url=$(pgbouncer_version_url "${package_version}")
   package_file="${package_url##*/}"
@@ -35,6 +34,7 @@ pgbouncer_versions_latest(){
   pgbouncer_latest
 
   latest="${latest%.tgz}"
+  latest="${latest%.tar.gz}"
   latest="${latest#*-}"
   log "${latest}"
 }
@@ -45,6 +45,7 @@ pgbouncer_versions_available() {
   for version in ${versions[@]}
   do
     version="${version%.tgz}"
+    version="${version%.tar.gz}"
     version="${version#*-}"
     log "${version}"
   done
@@ -65,6 +66,7 @@ pgbouncer_version_url()
 
     if [[ "${version}" == "${_current}" ]]
     then
+      # http://pgfoundry.org/frs/download.php/3393/pgbouncer-1.5.4.tar.gz
       log "http://pgfoundry.org/frs/download.php/${_path}"
       break
     fi
