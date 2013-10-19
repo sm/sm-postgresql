@@ -5,13 +5,33 @@ user is root || log error "'postgresql configure system' may only be run as root
 if ! path exists "${service_data_path}/base"
 then log error "Database must be initialized before configuration may be done: 'postgresql initialize'" ; fi
 
-paths create "/etc/postgresql/" "/var/log/postgresql" "/var/db/postgresql"
+paths create \
+	"/etc/postgresql/" "/var/log/postgresql" "/var/db/postgresql"
 
-user create unless exists system name "${service_user}" home "${service_db_path}"
+user create unless exists system \
+	name "${service_user}" \
+	home "${service_db_path}"
 
 postgresql_configure_shm
 
-template install "postgresql/postgresql.conf" \
+typeset template_file
+
+case ${package_version} in 
+	(9.3.*)
+		template_file="postgresql/postgresql-9.3.conf"
+		;;
+	(9.2.*|9.1.*|9.0.*)
+		template_file="postgresql/postgresql-9.conf"
+		;;
+	(8.*)
+		template_file="postgresql/postgresql-8.conf"
+		;;
+	(*)
+		log error "Unhandled PostgreSQL version to configure: ${package_version}"
+		;;
+esac
+
+template install ${template_file} \
   to "${service_data_path}/postgresql.conf" \
   mode 0644 \
   variables from postgresql_defaults
@@ -29,6 +49,9 @@ do
 done
 
 path chown "$service_user:$service_user" recursively "${service_data_path}"
+
 path chmod 0700 recursively "${service_data_path}"
 
 exit 0
+
+

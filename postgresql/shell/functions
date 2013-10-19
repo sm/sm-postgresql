@@ -89,20 +89,33 @@ postgresql_defaults()
 
   service_data_path="/var/db/postgresql/${major_minor_version}/data"
 
-  [[ -n "${json_uri}" ]] || json_uri="${extension_path}/config/defaults.json"
+  if [[ -z "${json_uri}" ]] 
+	then
+		case ${package_version} in 
+			(9.3.*)
+				json_uri="${extension_path}/config/defaults-9.3.json"
+				;;
+			(9.2.*|9.1.*|9.0.*)
+				json_uri="${extension_path}/config/defaults-9.json"
+				;;
+			(*)
+				log error "Unhandled PostgreSQL version for defaults json: ${package_version}"
+				;;
+		esac
+	fi
 
-  json get from ${json_uri} \
-    into "postgresql_defaults" \
-    string "postgresql/version" default "${package_version}" as "version" \
-    string "postgresql/bind" default 0.0.0.0 as "bind" \
-    string "postgresql/port" default 5432 as "port" \
-    string "postgresql/syslog/facility" default "local0" as "syslog_facility"\
-    string "postgresql/max/clients" default 80 as "max_clients" \
+	json get from ${json_uri} \
+		into "postgresql_defaults" \
+		string "postgresql/version" default "${package_version}" as "version" \
+		string "postgresql/bind" default 0.0.0.0 as "bind" \
+		string "postgresql/port" default 5432 as "port" \
+		string "postgresql/syslog/facility" default "local0" as "syslog_facility"\
+		string "postgresql/max/clients" default 80 as "max_clients" \
     string "postgresql/max/memory" default "128MB" as "max_memory" \
     string "postgresql/max/slow" default 1024 as "max_slow" \
     string "postgresql/log/slow" default 10000 as "log_slow" \
     string "postgresql/service/bin_path" as "service_bin_path" default "${sm_path}/pkg/versions/postgresql/${package_version}/bin" \
-    string "postgresql/service/pid_file" as "service_pid_file" default "/var/run/postgresql.pid" \
+    string "postgresql/service/pid_file" as "service_pid_file" default "${service_data_path}/postmaster.pid" \
     string "postgresql/service/config_file" as "service_config_file" default "/etc/postgresql/postgresql.conf" \
     string "postgresql/service/log_file" as "service_log_file" default "/var/log/postgresql/postgresql.log" \
     string "postgresql/service/user" as "service_user" default "${service_user}" \
@@ -110,14 +123,24 @@ postgresql_defaults()
     string "postgresql/start/timeout" as "start_timeout" default "300" \
     string "postgresql/replication/master" as "master" default "${master:-localhost}" \
     string "postgresql/replication/replica" as "replica" default "" \
+    string "postgresql/wal/level" as "wal_level" default "hot_standby" \
     string "postgresql/wal/buffers" as "wal_buffers" default "16MB" \
     string "postgresql/wal/writer_delay" as "wal_writer_delay" default "200ms" \
     string "postgresql/wal/max_senders" as "wal_max_senders" default "5" \
     string "postgresql/wal/keep_segments" as "wal_keep_segments" default "20" \
-    string "postgresql/checkpoint/segments" as "checkpoint_segments" default "100" \
+    string "postgresql/checkpoint/segments" as "checkpoint_segments" default "50" \
     string "postgresql/effective_cache_size" as "effective_cache_size" default "512MB" \
     string "postgresql/shared_buffers" as "shared_buffers" default "128MB" \
-    string "postgresql/unix_socket_directory" as "unix_socket_directory" default "/tmp"
+    string "postgresql/unix_socket_directory" as "unix_socket_directory" default "/tmp" \
+    string "postgresql/maintenance_work_mem" as "maintenance_work_mem" default "64MB" \
+    string "postgresql/work_mem" as "work_mem" default "2MB" \
+    string "postgresql/archive_mode" as "archive_mode" default "off" \
+    string "postgresql/archive_command" as "archive_command" default "" \
+    string "postgresql/archive_timeout" as "archive_timeout" default "0" \
+    string "postgresql/hot_standby" as "hot_standby" default "off" \
+    string "postgresql/fsync" as "fsync" default "on" \
+    string "postgresql/synchronous_commit" as "synchronous_commit" default "on" \
+    string "postgresql/temp_buffers" as "temp_buffers" default "8MB"
 
   PGDATA="${service_data_path}"
 }
