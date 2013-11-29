@@ -41,8 +41,8 @@ echo ${masterIP} > ${masterFile}
 chown -R postgres:postgres ${PGDATA}/pgha
 
 if (( debug == 0 ))
-then entry="* * * * * PGDATA=${PGDATA} /opt/sm/bin/sm postgresha run"
-else entry="* * * * * DEBUG=1 PGDATA=${PGDATA} /opt/sm/bin/sm postgresha run"
+then entry="* * * * * PGDATA=${PGDATA} /opt/sm/bin/sm pgha run"
+else entry="* * * * * DEBUG=1 PGDATA=${PGDATA} /opt/sm/bin/sm pgha run"
 fi
 
 if crontab -l | grep -q -v pgha 
