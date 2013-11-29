@@ -25,39 +25,34 @@
 # Keep track of where we go next.
 #
 
-typeset timestamp masterFile syncFile replicasFile replicatingFile
+typeset timestamp masterFile syncFile replicasFile replicatingFile myRole
+export PATH="/bin:/usr/bin:/sbin:/usr/sbin:/opt/sm/pkg/active/bin:/usr/local/bin"
 
 timestamp=$(date +"%Y-%m-%dT%H:%M:%S")
-
-exec &> ${PGDATA}/pgha/pgha.log
-echo "${timestamp}"
 
 if (( ${DEBUG} ))
 then set -x
 fi
 
-export PATH="/bin:/usr/bin:/sbin:/usr/sbin:/opt/sm/pkg/active/bin:/usr/local/bin"
-
 if [[ $USER != 'postgres' ]]
 then echo "pgha must be run as user 'postgres'"
 fi
 
-echo ${timestamp} > ${PGDATA}/pgha/lastRunAt
+exec &> ${PGDATA}/pgha/pgha.log
+echo "${timestamp}"
 
 masterFile=${PGDATA}/pgha/master
 syncFile=${PGDATA}/pgha/sync
 replicasFile=${PGDATA}/pgha/replicas
 replicatingFile=${PGDATA}/pgha/replicating
+masterIP=$(cat ${masterFile})
+syncIP=$(cat ${syncFile})
+replicaIPs=($(cat ${replicasFile}))
 
 #If the server from the last run is still in the process of replicating, abort this process
 if [[ -f ${replicatingFile} ]] 
 then exit 0
 fi
-
-myRole=""
-masterIP=$(cat ${masterFile})
-syncIP=$(cat ${syncFile})
-replicaIPs=($(cat ${replicasFile}))
 
 if [[ -z ${masterIP} ]]
 then
@@ -92,30 +87,28 @@ saveIPs() {
 }
 
 setMyRole() {
+    myRole="new"
     for addr in ${myIPs[@]}
     do 
         if [[ ${addr} == ${masterIP} ]] 
         then 
             myRole="master"
-            return 0
+            break
         fi
         if [[ ${addr} == ${syncIP} ]] 
         then 
             myRole="sync"
-            return 0
+            break
         fi
         for replicaIP in ${replicaIPs[@]}
         do
             if [[ ${addr} == ${replicaIP} ]] 
             then 
                 myRole="replica"
-                return 0
+                break
             fi
         done
     done
-
-    myRole="new"
-
     return 0
 }
 
@@ -124,6 +117,8 @@ replicateFromMaster() {
     /opt/sm/bin/sm postgresql replication configure master "${masterIP}"
     status=$?
     rm ${replicatingFile}
+    # Guarantee master IP is saved.
+    mkdir -p ${PGDATA}/pgha
     echo "${MasterIP}" > ${PGDATA}/pgha/master
     return ${status}
 }
