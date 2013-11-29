@@ -2,7 +2,7 @@
 
 if [[ "${USER}" != "${service_user}" ]]
 then
-  log fail "'replication configure' may only be run as the PosgreSQL user '${service_user}'"
+  log fail "prmotion may only be run as the PosgreSQL user '${service_user}'"
 fi
 
 #file write "true" to "${service_data_path}/failover"
