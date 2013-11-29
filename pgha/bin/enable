@@ -1,0 +1,46 @@
+#!/bin/sh
+
+if user is not postgres
+then log fail "This must be run as the postgres user."
+fi
+
+while (( $# ))
+do
+    token=$1;shift
+    case ${token} in
+        (master)
+            masterIp=$1 ; shift
+            ;;
+        (pgdata)
+            PGDATA=${1} ; shift
+            ;;
+        (debug)
+            debug=1
+            ;;
+        (*)
+            log fail "Unhandled token '${token}'"
+            ;;
+    esac
+done
+
+if variable is empty masterIp
+then log fail "'master <ip>' must be given"
+fi
+
+if variable is empty PGDATA
+then log fail "'pgdata <PGDATA>' must be given"
+fi
+
+masterFile=${pgData}/pgha/master
+echo ${masterIP} > ${masterFile}
+chown -R postgres:postgres ${pgData}/pgha
+
+if variable is empty debug
+then entry="* * * * * PGDATA=${PGDATA} /opt/sm/bin/sm postgresha run"
+else entry="* * * * * DEBUG=1 PGDATA=${PGDATA} /opt/sm/bin/sm postgresha run"
+fi
+
+if crontab -l | grep -q -v pgha 
+then addToCron ${entry}
+fi
+

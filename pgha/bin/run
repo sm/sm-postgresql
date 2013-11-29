@@ -1,0 +1,165 @@
+#!/usr/bin/env bash
+
+#
+# pgha - PostgreSQL High Availability Monitor
+#
+# NOTES:
+# - ${PGDATA}/pgha/master file with master IP address 
+#   must be put in place by the provisioner
+# - This script runs under the postgresql user as a minutely cronjob:
+#
+#    * * * * * PGDATA=/var/db/postgresql/9.3/data /opt/sm/bin/sm pgha run
+#
+# - To run manually in debug mode as user postgres:
+# 
+#   DEBUG=1 PGDATA=/var/db/postgresql/9.3/data sm pgha run
+#
+# TODO: 
+# - vmotion master comes back online safely.
+# - multiple failures including both master and sync.
+#
+# Questions:
+#  - Should we save the original MasterIP when sync is promoted?  Not unless we want to report back 
+#    to some central authority that the server pool lost a server
+#
+# Keep track of where we go next.
+#
+
+typeset timestamp masterIsResponsive masterFile syncFile replicasFile replicatingFile
+
+timestamp=$(date +"%Y-%m-%dT%H:%M:%S")
+
+mkdir -p ${PGDATA}/pgha
+exec &> ${PGDATA}/pgha/pgha.log
+echo "${timestamp}"
+
+if (( ${DEBUG} ))
+then set -x
+fi
+
+export PATH="$PATH:/opt/sm/pkg/active/bin"
+
+if [[ $USER != 'postgres' ]]
+then echo "pgha must be run as user 'postgres'"
+fi
+
+echo ${timestamp} > ${PGDATA}/pgha/lastRunAt
+
+masterFile=${PGDATA}/pgha/master
+syncFile=${PGDATA}/pgha/sync
+replicasFile=${PGDATA}/pgha/replicas
+replicatingFile=${PGDATA}/pgha/replicating
+
+#If the server from the last run is still in the process of replicating, abort this process
+if [[ -f ${replicatingFile} ]] 
+then exit 0
+fi
+
+myRole=""
+masterIP=$(cat ${masterFile})
+syncIP=$(cat ${syncFile})
+replicaIPs=($(cat ${replicasFile}))
+
+myIPs=($(ip addr list | awk '/inet / && /eth*/ &&!/127.0.0.1/{print $2}' | sed -e 's|/.*$||'))
+
+loadIPs() {
+    local ipSQL syncSQL replicaSQL
+    ipSQL="SELECT client_addr FROM pg_stat_replication "
+    syncSQL="${ipSQL} WHERE sync_state='sync';"
+    replicaSQL="${ipSQL} WHERE sync_state='potential' ORDER BY client_addr DESC;"
+    syncIP=$(psql -h ${masterIP} postgres -t -A -c "${syncSQL}")
+    replicaIPs=($(psql -h ${masterIP} postgres -t -A -c "${replicaSQL}"))
+}
+
+isResponsive() {
+    if psql -h ${1} postgres -t -A -c "select 'master is online';"
+    then masterIsResponsive=0
+    else masterIsResponsive=1
+    fi
+    return masterIsResponsive
+}
+
+saveIPs() {
+    echo ${masterIP} > ${masterFile}
+    echo ${syncIP} > ${syncFile}
+    echo ${replicaIPs[*]} > ${replicasFile}
+}
+
+setMyRole() {
+    for addr in ${myIPs[@]}
+    do 
+        if [[ ${addr} == ${masterIP} ]] 
+        then 
+            myRole="master"
+            return 0
+        fi
+        if [[ ${addr} == ${syncIP} ]] 
+        then 
+            myRole="sync"
+            return 0
+        fi
+    done
+    myRole="replica"
+    return 0
+}
+
+replicateFromMaster() {
+    touch ${replicatingFile}
+    /opt/sm/bin/sm postgresql replication configure master ${masterIP}
+    rm ${replicatingFile}
+}
+
+isReplicating() {
+    readOnly=$(psql -h ${1} postgres -t -A -c "SHOW transaction_read_only;")
+    [[ ${readOnly} == "on" ]]
+}
+
+promoteToMaster() {
+    touch ${PGDATA}/failover
+    masterIP=${syncIP}
+    syncIP=""
+    replicaIPs=""
+}
+
+if isResponsive ${masterIP}
+then loadIPs
+fi
+
+setMyRole
+
+case ${myRole} in
+    (master)
+        saveIPs
+        ;;
+    (sync)
+        if ! (( masterIsResponsive )) 
+        then promoteToMaster
+        fi
+        saveIPs
+        ;;
+    (replica|*)
+        if (( masterIsResponsive )) 
+        then 
+            if ! isReplicating 127.0.0.1
+            then 
+                replicateFromMaster
+                loadIPs
+            fi
+            saveIPs
+        else
+            if isResponsive ${syncIP}
+            then 
+                masterIP=${syncIP}
+                if ! isReplicating ${masterIP}
+                then 
+                    replicateFromMaster
+                    loadIPs
+                    saveIPs
+                fi
+            fi
+        fi
+        ;;
+esac
+
+exit $? # Let cron kickoff in one minute instead of sleeping
+
