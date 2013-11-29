@@ -25,7 +25,7 @@
 # Keep track of where we go next.
 #
 
-typeset timestamp masterFile syncFile replicasFile replicatingFile myRole
+typeset timestamp masterFile syncFile replicasFile replicatingFile myRole pghaPath
 export PATH="/bin:/usr/bin:/sbin:/usr/sbin:/opt/sm/pkg/active/bin:/usr/local/bin"
 
 timestamp=$(date +"%Y-%m-%dT%H:%M:%S")
@@ -38,13 +38,18 @@ if [[ $USER != 'postgres' ]]
 then echo "pgha must be run as user 'postgres'"
 fi
 
-exec &> ${PGDATA}/pgha/pgha.log
+
+pghaPath=${PGDATA}/../pgha
+#pghaPath=${HOME}/pgha
+#pghaPath=${TMP}/pgha
+
+exec &> ${pghaPath}/pgha.log
 echo "${timestamp}"
 
-masterFile=${PGDATA}/pgha/master
-syncFile=${PGDATA}/pgha/sync
-replicasFile=${PGDATA}/pgha/replicas
-replicatingFile=${PGDATA}/pgha/replicating
+masterFile=${pghaPath}/master
+syncFile=${pghaPath}/sync
+replicasFile=${pghaPath}/replicas
+replicatingFile=${pghaPath}/replicating
 masterIP=$(cat ${masterFile})
 syncIP=$(cat ${syncFile})
 replicaIPs=($(cat ${replicasFile}))
@@ -80,7 +85,7 @@ isResponsive() {
 }
 
 saveIPs() {
-    mkdir -p ${PGDATA}/pgha # Because replication eliminates this dir.
+    mkdir -p ${pghaPath} # Because replication eliminates this dir.
     echo ${masterIP} > ${masterFile}
     echo ${syncIP} > ${syncFile}
     echo ${replicaIPs[*]} > ${replicasFile}
@@ -116,10 +121,10 @@ replicateFromMaster() {
     touch ${replicatingFile}
     /opt/sm/bin/sm postgresql replication configure master "${masterIP}"
     status=$?
-    rm ${replicatingFile}
+    rm -f ${replicatingFile}
     # Guarantee master IP is saved.
-    mkdir -p ${PGDATA}/pgha
-    echo "${MasterIP}" > ${PGDATA}/pgha/master
+    mkdir -p ${pghaPath}
+    echo "${MasterIP}" > ${masterFile}
     return ${status}
 }
 
@@ -134,8 +139,8 @@ isReplicating() {
 }
 
 promoteToMaster() {
-    # TODO: use: /opt/sm/bin/sm postgresql replication promote
-    touch ${PGDATA}/failover
+    #touch ${PGDATA}/failover
+    /opt/sm/bin/sm postgresql replication promote
     masterIP=${syncIP}
     syncIP=""
     replicaIPs=""
