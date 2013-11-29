@@ -3,7 +3,7 @@
 typeset masterIp PGDATA masterFile debug entry
 debug=0
 
-if user is not root
+if (( UID > 0 ))
 then log fail "This must be run as root."
 fi
 
