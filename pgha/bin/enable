@@ -45,7 +45,7 @@ then entry="* * * * * PGDATA=${PGDATA} /opt/sm/bin/sm pgha run"
 else entry="* * * * * DEBUG=1 PGDATA=${PGDATA} /opt/sm/bin/sm pgha run"
 fi
 
-if crontab -l | grep -q -v pgha 
-then (crontab -l ; echo ${entry}) | crontab -
+if crontab -u postgres -l | grep -q -v pgha 
+then (crontab -u postgres -l ; echo ${entry}) | crontab -u postgres -
 fi
 
