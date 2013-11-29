@@ -31,6 +31,8 @@ if variable is empty PGDATA
 then log fail "'pgdata <PGDATA>' must be given"
 fi
 
+mkdir -p ${PGDATA}/pgha
+
 masterFile=${pgData}/pgha/master
 echo ${masterIP} > ${masterFile}
 chown -R postgres:postgres ${pgData}/pgha

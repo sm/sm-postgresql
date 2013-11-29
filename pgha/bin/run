@@ -25,11 +25,10 @@
 # Keep track of where we go next.
 #
 
-typeset timestamp masterIsResponsive masterFile syncFile replicasFile replicatingFile
+typeset timestamp masterFile syncFile replicasFile replicatingFile
 
 timestamp=$(date +"%Y-%m-%dT%H:%M:%S")
 
-mkdir -p ${PGDATA}/pgha
 exec &> ${PGDATA}/pgha/pgha.log
 echo "${timestamp}"
 
@@ -37,7 +36,7 @@ if (( ${DEBUG} ))
 then set -x
 fi
 
-export PATH="$PATH:/opt/sm/pkg/active/bin"
+export PATH="/bin:/usr/bin:/sbin:/usr/sbin:/opt/sm/pkg/active/bin:/usr/local/bin"
 
 if [[ $USER != 'postgres' ]]
 then echo "pgha must be run as user 'postgres'"
@@ -60,6 +59,13 @@ masterIP=$(cat ${masterFile})
 syncIP=$(cat ${syncFile})
 replicaIPs=($(cat ${replicasFile}))
 
+if [[ -z ${masterIP} ]]
+then
+    echo "ERROR: pgha can not run, a master IP has not been set in ${masterFile}"
+    exit 1
+fi
+
+
 myIPs=($(ip addr list | awk '/inet / && /eth*/ &&!/127.0.0.1/{print $2}' | sed -e 's|/.*$||'))
 
 loadIPs() {
@@ -67,19 +73,19 @@ loadIPs() {
     ipSQL="SELECT client_addr FROM pg_stat_replication "
     syncSQL="${ipSQL} WHERE sync_state='sync';"
     replicaSQL="${ipSQL} WHERE sync_state='potential' ORDER BY client_addr DESC;"
-    syncIP=$(psql -h ${masterIP} postgres -t -A -c "${syncSQL}")
-    replicaIPs=($(psql -h ${masterIP} postgres -t -A -c "${replicaSQL}"))
+    syncIP=$(psql -h "${masterIP}" postgres -t -A -c "${syncSQL}")
+    replicaIPs=($(psql -h "${masterIP}" postgres -t -A -c "${replicaSQL}"))
 }
 
 isResponsive() {
     if psql -h ${1} postgres -t -A -c "select 'master is online';"
-    then masterIsResponsive=0
-    else masterIsResponsive=1
+    then return 0
+    else return 1
     fi
-    return masterIsResponsive
 }
 
 saveIPs() {
+    mkdir -p ${PGDATA}/pgha # Because replication eliminates this dir.
     echo ${masterIP} > ${masterFile}
     echo ${syncIP} > ${syncFile}
     echo ${replicaIPs[*]} > ${replicasFile}
@@ -98,23 +104,42 @@ setMyRole() {
             myRole="sync"
             return 0
         fi
+        for replicaIP in ${replicaIPs[@]}
+        do
+            if [[ ${addr} == ${replicaIP} ]] 
+            then 
+                myRole="replica"
+                return 0
+            fi
+        done
     done
-    myRole="replica"
+
+    myRole="new"
+
     return 0
 }
 
 replicateFromMaster() {
     touch ${replicatingFile}
-    /opt/sm/bin/sm postgresql replication configure master ${masterIP}
+    /opt/sm/bin/sm postgresql replication configure master "${masterIP}"
+    status=$?
     rm ${replicatingFile}
+    echo "${MasterIP}" > ${PGDATA}/pgha/master
+    return ${status}
 }
 
 isReplicating() {
-    readOnly=$(psql -h ${1} postgres -t -A -c "SHOW transaction_read_only;")
-    [[ ${readOnly} == "on" ]]
+    local _ip
+    _ip="${1}"
+    readOnly=$(psql -h "${_ip}" postgres -t -A -c "SHOW transaction_read_only;")
+    if [[ ${readOnly} == "on" ]]
+    then return 0
+    else return 1
+    fi
 }
 
 promoteToMaster() {
+    # TODO: use: /opt/sm/bin/sm postgresql replication promote
     touch ${PGDATA}/failover
     masterIP=${syncIP}
     syncIP=""
@@ -132,34 +157,31 @@ case ${myRole} in
         saveIPs
         ;;
     (sync)
-        if ! (( masterIsResponsive )) 
+        if ! isResponsive ${masterIP}
         then promoteToMaster
         fi
         saveIPs
         ;;
-    (replica|*)
-        if (( masterIsResponsive )) 
+    (replica)
+        if isResponsive ${masterIP}
         then 
-            if ! isReplicating 127.0.0.1
-            then 
-                replicateFromMaster
-                loadIPs
-            fi
             saveIPs
-        else
-            if isResponsive ${syncIP}
-            then 
-                masterIP=${syncIP}
-                if ! isReplicating ${masterIP}
-                then 
-                    replicateFromMaster
-                    loadIPs
-                    saveIPs
-                fi
-            fi
+        elif [[ -n ${syncIP} ]] && isResponsive ${syncIP}
+        then 
+            masterIP=${syncIP}
+            replicateFromMaster
+            loadIPs
+            saveIPs
         fi
+        ;;
+    (new)
+        replicateFromMaster
+        loadIPs
+        saveIPs
         ;;
 esac
 
 exit $? # Let cron kickoff in one minute instead of sleeping
+
+
 
