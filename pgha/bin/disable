@@ -1,10 +1,10 @@
 #!/bin/sh
 
-if [[ $USER != 'postgres' ]]
-then log fail "This must be run as the postgres user."
+if user is not root
+then log fail "This must be run as root."
 fi
 
-if crontab -l | grep -q pgha 
-then (crontab -l | grep -v pgha) | crontab -
+if crontab -u postgres -l | grep -q pgha 
+then (crontab -u postgres -l | grep -v pgha) | crontab -u postgres -
 fi
 

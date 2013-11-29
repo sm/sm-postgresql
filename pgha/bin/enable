@@ -3,8 +3,8 @@
 typeset masterIp PGDATA masterFile debug entry
 debug=0
 
-if [[ $USER != 'postgres' ]]
-then log fail "This must be run as the postgres user."
+if user is not root
+then log fail "This must be run as root."
 fi
 
 while (( $# ))
