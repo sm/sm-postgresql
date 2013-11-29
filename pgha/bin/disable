@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if ! [[ $USER != 'postgres' ]]
+if [[ $USER != 'postgres' ]]
 then log fail "This must be run as the postgres user."
 fi
 
