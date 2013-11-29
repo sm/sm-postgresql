@@ -1,5 +1,8 @@
 #!/bin/sh
 
+typeset masterIp PGDATA masterFile debug entry
+debug=0
+
 if [[ $USER != 'postgres' ]]
 then log fail "This must be run as the postgres user."
 fi
@@ -23,26 +26,26 @@ do
     esac
 done
 
-if variable is empty masterIp
+if [[ -z ${masterIp} ]]
 then log fail "'master <ip>' must be given"
 fi
 
-if variable is empty PGDATA
+if [[ -z ${PGDATA} ]]
 then log fail "'pgdata <PGDATA>' must be given"
 fi
 
 mkdir -p ${PGDATA}/pgha
 
-masterFile=${pgData}/pgha/master
+masterFile=${PGDATA}/pgha/master
 echo ${masterIP} > ${masterFile}
-chown -R postgres:postgres ${pgData}/pgha
+chown -R postgres:postgres ${PGDATA}/pgha
 
-if variable is empty debug
+if (( debug == 0 ))
 then entry="* * * * * PGDATA=${PGDATA} /opt/sm/bin/sm postgresha run"
 else entry="* * * * * DEBUG=1 PGDATA=${PGDATA} /opt/sm/bin/sm postgresha run"
 fi
 
 if crontab -l | grep -q -v pgha 
-then addToCron ${entry}
+then (crontab -l ; echo ${entry}) | crontab -
 fi
 

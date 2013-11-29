@@ -5,6 +5,6 @@ then log fail "This must be run as the postgres user."
 fi
 
 if crontab -l | grep -q pgha 
-then removeFromCron
+then (crontab -l | grep -v pgha) | crontab -
 fi
 

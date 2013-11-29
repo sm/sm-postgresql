@@ -1,9 +1,1 @@
 #!/bin/sh
-
-addToCron() {
-    (crontab -l ; echo \"${*}\") | crontab -
-}
-
-removeFromCron() {
-    (crontab -l | grep -v pgha) | crontab -
-}

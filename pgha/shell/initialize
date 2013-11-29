@@ -1,4 +1,2 @@
 #!/bin/sh
 
-typeset masterIp PGDATA masterFile debug
-
