@@ -116,7 +116,7 @@ setMyRole() {
 
 replicateFromMaster() {
   local _status
-  touch ${replicatingFile}
+  echo $$ > ${replicatingFile}
   if /opt/sm/bin/sm postgresql replication configure master "${masterIP}"
   then _status=0
   else _status=1
