@@ -1,6 +1,6 @@
 #!/bin/sh
 
-typeset masterIp PGDATA masterFile debug entry
+typeset masterIp PGDATA masterFile debug entry pghaPath
 debug=0
 
 if (( UID > 0 ))
