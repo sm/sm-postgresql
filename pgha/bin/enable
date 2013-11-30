@@ -34,11 +34,12 @@ if [[ -z ${PGDATA} ]]
 then log fail "'pgdata <PGDATA>' must be given"
 fi
 
-mkdir -p ${PGDATA}/pgha
+pghaPath=${PGDATA}/../pgha # Parallel to PGDATA
+masterFile=${pghaPath}/master
 
-masterFile=${PGDATA}/pgha/master
+mkdir -p ${pghaPath}
 echo ${masterIp} > ${masterFile}
-chown -R postgres:postgres ${PGDATA}/pgha
+chown -R postgres:postgres ${pghaPath}
 
 if (( debug == 0 ))
 then entry="* * * * * PGDATA=${PGDATA} /opt/sm/bin/sm pgha run"
