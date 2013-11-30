@@ -175,13 +175,26 @@ case ${myRole} in
             if (( ${#replicaIPs} == 1 ))
             then # I am a replica and no other replicas exist.
               promoteToMaster
+            elif  (( ${#replicaIPs} > 1 ))
+            then
+              if isResponsive ${replicaIPs[0]}
+              then
+                masterIP=${replicaIPs[0]}
+                if replicateFromMaster
+                then
+                  loadIPs
+                  saveIPs
+                fi
+              fi
             fi
         fi
         ;;
     (new)
-        replicateFromMaster
-        loadIPs
-        saveIPs
+        if replicateFromMaster
+        then
+          loadIPs
+          saveIPs
+        fi
         ;;
 esac
 
