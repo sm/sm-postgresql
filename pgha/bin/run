@@ -63,7 +63,6 @@ then
     exit 1
 fi
 
-
 myIPs=($(ip addr list | awk '/inet / && /eth*/ &&!/127.0.0.1/{print $2}' | sed -e 's|/.*$||'))
 
 loadIPs() {
@@ -116,14 +115,16 @@ setMyRole() {
 }
 
 replicateFromMaster() {
-    touch ${replicatingFile}
-    /opt/sm/bin/sm postgresql replication configure master "${masterIP}"
-    status=$?
-    rm -f ${replicatingFile}
-    # Guarantee master IP is saved.
-    mkdir -p ${pghaPath}
-    echo "${MasterIP}" > ${masterFile}
-    return ${status}
+  local _status
+  touch ${replicatingFile}
+  if /opt/sm/bin/sm postgresql replication configure master "${masterIP}"
+  then _status=0
+  else _status=1
+  fi
+  # Need to guarantee the replicating file is removed and the master IP is saved
+  # Hence the if statement above to catch every case.
+  rm -f ${replicatingFile}
+  return ${_status}
 }
 
 isReplicating() {
