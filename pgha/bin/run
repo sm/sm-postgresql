@@ -53,7 +53,7 @@ syncIP=$(cat ${syncFile})
 replicaIPs=($(cat ${replicasFile}))
 
 #If the server from the last run is still in the process of replicating, abort this process
-if [[ -f ${replicatingFile} ]] 
+if [[ -s ${replicatingFile} ]] 
 then exit 0
 fi
 
