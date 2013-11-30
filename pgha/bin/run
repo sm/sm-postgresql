@@ -27,8 +27,14 @@
 
 typeset timestamp masterFile syncFile replicasFile replicatingFile myRole pghaPath
 export PATH="/bin:/usr/bin:/sbin:/usr/sbin:/opt/sm/pkg/active/bin:/usr/local/bin"
-
 timestamp=$(date +"%Y-%m-%dT%H:%M:%S")
+pghaPath=${PGDATA}/../pgha
+# Other options of where we could put pghaPath include,
+# pghaPath=${HOME}/pgha
+# pghaPath=${TMP}/pgha
+
+exec &> ${pghaPath}/pgha.log
+echo "${timestamp}"
 
 if (( ${DEBUG} ))
 then set -x
@@ -37,14 +43,6 @@ fi
 if [[ $USER != 'postgres' ]]
 then echo "pgha must be run as user 'postgres'"
 fi
-
-
-pghaPath=${PGDATA}/../pgha
-#pghaPath=${HOME}/pgha
-#pghaPath=${TMP}/pgha
-
-exec &> ${pghaPath}/pgha.log
-echo "${timestamp}"
 
 masterFile=${pghaPath}/master
 syncFile=${pghaPath}/sync
