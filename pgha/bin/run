@@ -171,6 +171,11 @@ case ${myRole} in
             replicateFromMaster
             loadIPs
             saveIPs
+        else # master and sync replica are offline...
+            if (( ${#replicaIPs} == 1 ))
+            then # I am a replica and no other replicas exist.
+              promoteToMaster
+            fi
         fi
         ;;
     (new)
