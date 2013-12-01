@@ -83,7 +83,7 @@ loadIPs() {
 isResponsive() {
   local _ip
   _ip=${1}
-  if ${_ip}
+  if [[ -z ${_ip} ]]
   then 
     echo "ERROR: isResponsive called without ip!"
     return 1
