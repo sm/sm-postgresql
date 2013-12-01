@@ -25,7 +25,7 @@
 # Keep track of where we go next.
 #
 
-typeset timestamp masterFile syncFile replicasFile replicatingFile myRole pghaPath syncIP
+typeset timestamp masterFile syncFile replicasFile replicatingFile myRole pghaPath syncIP masterIP
 declare -a replicaIPs myIPs
 
 export PATH="/bin:/usr/bin:/sbin:/usr/sbin:/opt/sm/pkg/active/bin:/usr/local/bin"
