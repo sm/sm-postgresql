@@ -25,8 +25,11 @@
 # Keep track of where we go next.
 #
 
-typeset timestamp masterFile syncFile replicasFile replicatingFile myRole pghaPath
+typeset timestamp masterFile syncFile replicasFile replicatingFile myRole pghaPath syncIP
+declare -a replicaIPs myIPs
+
 export PATH="/bin:/usr/bin:/sbin:/usr/sbin:/opt/sm/pkg/active/bin:/usr/local/bin"
+
 timestamp=$(date +"%Y-%m-%dT%H:%M:%S")
 pghaPath=${PGDATA}/../pgha
 # Other options of where we could put pghaPath include,
@@ -59,59 +62,69 @@ fi
 
 if [[ -z ${masterIP} ]]
 then
-    echo "ERROR: pgha can not run, a master IP has not been set in ${masterFile}"
-    exit 1
+  echo "ERROR: pgha can not run, a master IP has not been set in ${masterFile}"
+  exit 1
 fi
 
 myIPs=($(ip addr list | awk '/inet / && /eth*/ &&!/127.0.0.1/{print $2}' | sed -e 's|/.*$||'))
 
 loadIPs() {
-    local ipSQL syncSQL replicaSQL
+  local _ipSQL _syncSQL _replicaSQL
+  if [[ -n ${masterIP} ]]
+  then
     ipSQL="SELECT client_addr FROM pg_stat_replication "
-    syncSQL="${ipSQL} WHERE sync_state='sync';"
-    replicaSQL="${ipSQL} WHERE sync_state='potential' ORDER BY client_addr DESC;"
-    syncIP=$(psql -h "${masterIP}" postgres -t -A -c "${syncSQL}")
-    replicaIPs=($(psql -h "${masterIP}" postgres -t -A -c "${replicaSQL}"))
+    syncSQL="${_ipSQL} WHERE sync_state='sync';"
+    replicaSQL="${_ipSQL} WHERE sync_state='potential' ORDER BY client_addr DESC;"
+    syncIP=$(psql -h "${masterIP}" postgres -t -A -c "${_syncSQL}")
+    replicaIPs=($(psql -h "${masterIP}" postgres -t -A -c "${_replicaSQL}"))
+  fi
 }
 
 isResponsive() {
-    if psql -h ${1} postgres -t -A -c "select 'master is online';"
-    then return 0
-    else return 1
-    fi
+  local _ip
+  _ip=${1}
+  if ${_ip}
+  then 
+    echo "ERROR: isResponsive called without ip!"
+    return 1
+  fi
+  if psql -h ${1} postgres -t -A -c "select 'master is online';"
+  then return 0
+  else return 1
+  fi
 }
 
 saveIPs() {
-    mkdir -p ${pghaPath} # Because replication eliminates this dir.
-    echo ${masterIP} > ${masterFile}
-    echo ${syncIP} > ${syncFile}
-    echo ${replicaIPs[*]} > ${replicasFile}
+  mkdir -p ${pghaPath} # Because replication eliminates this dir.
+  echo ${masterIP} > ${masterFile}
+  echo ${syncIP} > ${syncFile}
+  echo ${replicaIPs[*]} > ${replicasFile}
 }
 
 setMyRole() {
-    myRole="new"
-    for addr in ${myIPs[@]}
-    do 
-        if [[ ${addr} == ${masterIP} ]] 
-        then 
-            myRole="master"
-            break
-        fi
-        if [[ ${addr} == ${syncIP} ]] 
-        then 
-            myRole="sync"
-            break
-        fi
-        for replicaIP in ${replicaIPs[@]}
-        do
-            if [[ ${addr} == ${replicaIP} ]] 
-            then 
-                myRole="replica"
-                break
-            fi
-        done
+  myRole="new"
+  for addr in ${myIPs[@]}
+  do 
+    if [[ ${addr} == ${masterIP} ]] 
+    then 
+      myRole="master"
+      break
+    fi
+    if [[ ${addr} == ${syncIP} ]] 
+    then 
+      myRole="sync"
+      break
+    fi
+    for replicaIP in ${replicaIPs[@]}
+    do
+      if [[ ${addr} == ${replicaIP} ]] 
+      then 
+        myRole="replica"
+        break
+      fi
     done
-    return 0
+  done
+  return 0
 }
 
 replicateFromMaster() {
@@ -128,21 +141,21 @@ replicateFromMaster() {
 }
 
 isReplicating() {
-    local _ip
-    _ip="${1}"
-    readOnly=$(psql -h "${_ip}" postgres -t -A -c "SHOW transaction_read_only;")
-    if [[ ${readOnly} == "on" ]]
-    then return 0
-    else return 1
-    fi
+  local _ip
+  _ip="${1}"
+  readOnly=$(psql -h "${_ip}" postgres -t -A -c "SHOW transaction_read_only;")
+  if [[ ${readOnly} == "on" ]]
+  then return 0
+  else return 1
+  fi
 }
 
 promoteToMaster() {
-    #touch ${PGDATA}/failover
-    /opt/sm/bin/sm postgresql replication promote
-    masterIP=${syncIP}
-    syncIP=""
-    replicaIPs=""
+  #touch ${PGDATA}/failover
+  /opt/sm/bin/sm postgresql replication promote
+  masterIP=${syncIP}
+  syncIP=""
+  replicaIPs=""
 }
 
 if isResponsive ${masterIP}
@@ -152,53 +165,50 @@ fi
 setMyRole
 
 case ${myRole} in
-    (master)
-        saveIPs
-        ;;
-    (sync)
-        if ! isResponsive ${masterIP}
-        then promoteToMaster
-        fi
-        saveIPs
-        ;;
-    (replica)
-        if isResponsive ${masterIP}
-        then 
-            saveIPs
-        elif [[ -n ${syncIP} ]] && isResponsive ${syncIP}
-        then 
-            masterIP=${syncIP}
-            replicateFromMaster
+  (master)
+    saveIPs
+    ;;
+  (sync)
+    if ! isResponsive ${masterIP}
+    then promoteToMaster
+    fi
+    saveIPs
+    ;;
+  (replica)
+    if isResponsive ${masterIP}
+    then 
+      saveIPs
+    elif [[ -n ${syncIP} ]] && isResponsive ${syncIP}
+    then 
+      masterIP=${syncIP}
+      replicateFromMaster
+      loadIPs
+      saveIPs
+    else # master and sync replica are offline...
+      if (( ${#replicaIPs} == 1 ))
+      then # I am a replica and no other replicas exist.
+        promoteToMaster
+      elif  (( ${#replicaIPs} > 1 ))
+      then
+        if isResponsive ${replicaIPs[0]}
+        then
+          masterIP=${replicaIPs[0]}
+          if replicateFromMaster
+          then
             loadIPs
             saveIPs
-        else # master and sync replica are offline...
-            if (( ${#replicaIPs} == 1 ))
-            then # I am a replica and no other replicas exist.
-              promoteToMaster
-            elif  (( ${#replicaIPs} > 1 ))
-            then
-              if isResponsive ${replicaIPs[0]}
-              then
-                masterIP=${replicaIPs[0]}
-                if replicateFromMaster
-                then
-                  loadIPs
-                  saveIPs
-                fi
-              fi
-            fi
+          fi
         fi
-        ;;
-    (new)
-        if replicateFromMaster
-        then
-          loadIPs
-          saveIPs
-        fi
-        ;;
+      fi
+    fi
+    ;;
+  (new)
+    if replicateFromMaster
+    then
+      loadIPs
+      saveIPs
+    fi
+    ;;
 esac
 
 exit $? # Let cron kickoff in one minute instead of sleeping
-
-
-
