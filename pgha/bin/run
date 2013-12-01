@@ -25,7 +25,7 @@
 # Keep track of where we go next.
 #
 
-typeset timestamp masterFile syncFile replicasFile replicatingFile myRole pghaPath syncIP masterIP
+typeset timestamp masterFile syncFile replicasFile replicatingFile myRole pghaPath syncIP masterIP firstReplica
 declare -a replicaIPs myIPs
 
 export PATH="/bin:/usr/bin:/sbin:/usr/sbin:/opt/sm/pkg/active/bin:/usr/local/bin"
@@ -190,9 +190,10 @@ case ${myRole} in
         promoteToMaster
       elif  (( ${#replicaIPs} > 1 ))
       then
-        if isResponsive ${replicaIPs[0]}
+        firstReplica=${replicaIPs[1]}
+        if isResponsive ${firstReplica}
         then
-          masterIP=${replicaIPs[0]}
+          masterIP=${firstReplica}
           if replicateFromMaster
           then
             loadIPs
