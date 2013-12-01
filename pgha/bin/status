@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+if [[ -s ${pghaLog} ]]
+then tail -n 100 ${pghaLog}
+fi
+
+echo "
+masterIP: ${masterIP}
+syncIP: ${syncIP}
+replicaIPs: ${replicaIPs[*]}
+"
+if [[ -s ${replicatingFile} ]]
+then echo "replicatingSince: $(cat ${replicatingFile})"
+fi
+
+if isResponsive ${masterIP}
+then echo "master: online"
+else echo "master: offline"
+fi
+
+exit 0
+

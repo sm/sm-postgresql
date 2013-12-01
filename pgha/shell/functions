@@ -1,1 +1,151 @@
 #!/bin/sh
+
+pgha_initialize() {
+  typeset -x timestamp masterFile syncFile replicasFile replicatingFile myRole 
+  typeset -x pghaPath syncIP masterIP firstReplica PGDATA DEBUG pghaLog
+  declare -ax replicaIPs myIPs args
+
+  export PATH="/bin:/usr/bin:/sbin:/usr/sbin:/opt/sm/pkg/active/bin:/usr/local/bin"
+  (( ${DEBUG:=0} == 0 )) || set -x
+
+  # TODO: IF user is root, re-exec as postgres
+  if [[ $USER != 'postgres' ]]
+  then 
+    echo "pgha actions must be run as user 'postgres'"
+    exit 1
+  fi
+
+  if [[ -z ${PGDATA} ]]
+  then
+    echo "environment variable 'PGDATA' must be set."
+    exit 1
+  fi
+
+  pghaPath=${PGDATA}/../pgha
+  pghaLog=${pghaPath}/pgha.log
+  masterFile=${pghaPath}/master
+  syncFile=${pghaPath}/sync
+  replicasFile=${pghaPath}/replicas
+  replicatingFile=${pghaPath}/replicating
+
+  timestamp=$(date +"%Y-%m-%dT%H:%M:%S")
+
+  myIPs=($(ip addr list | awk '/inet / && /eth*/ &&!/127.0.0.1/{print $2}' | sed -e 's|/.*$||'))
+
+  if [[ -s ${masterFile} ]]
+  then masterIP=$(cat ${masterFile})
+  else masterIP=""
+  fi
+
+  if [[ -z ${masterIP} ]]
+  then
+    echo "ERROR: pgha can not run, a master IP has not been set in ${masterFile}"
+    exit 1
+  fi
+
+  if [[ -s ${syncFile} ]]
+  then syncIP=$(cat ${syncFile})
+  else syncIP=""
+  fi
+
+  if [[ -s ${replicasFile} ]]
+  then replicaIPs=($(cat ${replicasFile}))
+  else replicaIPs=()
+  fi
+}
+loadIPs() {
+  local _ipSQL _syncSQL _replicaSQL
+  if [[ -n ${masterIP} ]]
+  then
+    _ipSQL="SELECT client_addr FROM pg_stat_replication "
+    _syncSQL="${_ipSQL} WHERE sync_state='sync';"
+    _replicaSQL="${_ipSQL} WHERE sync_state='potential' ORDER BY client_addr DESC;"
+    syncIP=$(psql -h "${masterIP}" postgres -t -A -c "${_syncSQL}")
+    replicaIPs=($(psql -h "${masterIP}" postgres -t -A -c "${_replicaSQL}"))
+  fi
+}
+
+isResponsive() {
+  local _ip
+  _ip=${1}
+  if [[ -z ${_ip} ]]
+  then 
+    echo "ERROR: isResponsive called without ip!"
+    return 1
+  fi
+  if psql -h ${_ip} postgres -t -A -c "select '${_ip} is responsive';"
+  then return 0
+  else return 1
+  fi
+}
+
+saveIPs() {
+  mkdir -p ${pghaPath} # Ensure the pgha path exists
+  echo ${masterIP} > ${masterFile}
+  echo ${syncIP} > ${syncFile}
+  echo ${replicaIPs[*]} > ${replicasFile}
+}
+
+setMyRole() {
+  myRole="new"
+  for addr in ${myIPs[@]}
+  do 
+    if [[ ${addr} == ${masterIP} ]] 
+    then 
+      myRole="master"
+      break
+    fi
+    if [[ ${addr} == ${syncIP} ]] 
+    then 
+      myRole="sync"
+      break
+    fi
+    for replicaIP in ${replicaIPs[@]}
+    do
+      if [[ ${addr} == ${replicaIP} ]] 
+      then 
+        myRole="replica"
+        break
+      fi
+    done
+  done
+  return 0
+}
+
+replicateFromMaster() {
+  local _status
+  echo $$ > ${replicatingFile}
+  if /opt/sm/bin/sm postgresql replication configure master "${masterIP}"
+  then _status=0
+  else _status=1
+  fi
+  # Need to guarantee the replicating file is removed and the master IP is saved
+  # Hence the if statement above to catch every case.
+  rm -f ${replicatingFile}
+  return ${_status}
+}
+
+isReplicating() {
+  local _ip
+  _ip="${1}"
+  readOnly=$(psql -h "${_ip}" postgres -t -A -c "SHOW transaction_read_only;")
+  if [[ ${readOnly} == "on" ]]
+  then return 0
+  else return 1
+  fi
+}
+
+promoteToMaster() {
+  #touch ${PGDATA}/failover
+  /opt/sm/bin/sm postgresql replication promote
+  masterIP=${syncIP}
+  syncIP=""
+  replicaIPs=()
+}
+
+replicationIsStarting() {
+  if [[ -s ${replicatingFile} ]] 
+  then return 0
+  else return 1
+  fi
+}
