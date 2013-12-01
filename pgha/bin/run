@@ -88,7 +88,7 @@ isResponsive() {
     echo "ERROR: isResponsive called without ip!"
     return 1
   fi
-  if psql -h ${1} postgres -t -A -c "select 'master is online';"
+  if psql -h ${_ip} postgres -t -A -c "select '${_ip} is responsive';"
   then return 0
   else return 1
   fi
