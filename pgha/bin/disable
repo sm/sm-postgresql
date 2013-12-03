@@ -1,10 +1,6 @@
 #!/bin/sh
 
-if (( UID > 0 ))
-then log fail "This must be run as root."
-fi
-
-if crontab -u postgres -l | grep -q pgha 
-then (crontab -u postgres -l | grep -v pgha) | crontab -u postgres -
+if crontab -l | grep -q pgha 
+then (crontab -l | grep -v pgha) | crontab -
 fi
 

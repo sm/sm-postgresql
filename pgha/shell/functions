@@ -15,6 +15,26 @@ pgha_initialize() {
     exit 1
   fi
 
+  while (( $# ))
+  do
+      token=$1;shift
+      case ${token} in
+          (master)
+              masterIp=$1 ; shift
+              ;;
+          (pgdata)
+              PGDATA=${1} ; shift
+              ;;
+          (debug)
+              debug=1
+              ;;
+          (*)
+              log fail "Unhandled token '${token}'"
+              ;;
+      esac
+  done
+
+
   if [[ -z ${PGDATA} ]]
   then
     echo "environment variable 'PGDATA' must be set."
