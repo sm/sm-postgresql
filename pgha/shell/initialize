@@ -1,0 +1,74 @@
+#!/bin/sh
+
+typeset -x timestamp masterFile syncFile replicasFile replicatingFile myRole 
+typeset -x pghaPath syncIP masterIP firstReplica PGDATA DEBUG pghaLog
+declare -ax replicaIPs myIPs args
+
+export PATH="/bin:/usr/bin:/sbin:/usr/sbin:/opt/sm/pkg/active/bin:/usr/local/bin"
+(( ${DEBUG:=0} == 0 )) || set -x
+
+# TODO: IF user is root, re-exec as postgres
+if [[ $USER != 'postgres' ]]
+then 
+    echo "pgha actions must be run as user 'postgres'"
+    exit 1
+fi
+
+typeset -a newArgs
+while (( ${#extension_args} > 0 ))
+do
+    array shift extension_args into token
+    case ${token} in
+        (pgha)
+            continue
+            ;;
+        (master)
+            array shift extension_args into masterIp
+            ;;
+        (pgdata)
+            array shift extension_args into PGDATA
+            ;;
+        (debug)
+            DEBUG=1
+            ;;
+        (*)
+            if variable is nonempty token
+            then newargs+=("${token}")
+            fi
+            ;;
+    esac
+done
+
+extension_args=("${newArgs[@]}")
+
+if [[ -z ${PGDATA} ]]
+then
+    echo "environment variable 'PGDATA' must be set."
+    exit 1
+fi
+
+pghaPath=${PGDATA}/../pgha
+pghaLog=${pghaPath}/pgha.log
+masterFile=${pghaPath}/master
+syncFile=${pghaPath}/sync
+replicasFile=${pghaPath}/replicas
+replicatingFile=${pghaPath}/replicating
+
+timestamp=$(date +"%Y-%m-%dT%H:%M:%S")
+
+myIPs=($(ip addr list | awk '/inet / && /eth*/ &&!/127.0.0.1/{print $2}' | sed -e 's|/.*$||'))
+
+if [[ -s ${masterFile} ]]
+then masterIP=$(cat ${masterFile})
+else masterIP=""
+fi
+
+if [[ -s ${syncFile} ]]
+then syncIP=$(cat ${syncFile})
+else syncIP=""
+fi
+
+if [[ -s ${replicasFile} ]]
+then replicaIPs=($(cat ${replicasFile}))
+else replicaIPs=()
+fi
