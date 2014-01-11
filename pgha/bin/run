@@ -50,6 +50,9 @@ setMyRole
 case ${myRole} in
   (master)
     saveIPs
+    if isResponsive ${masterIP}
+      then saveToEtcd
+    fi
     ;;
   (sync)
     if ! isResponsive ${masterIP}

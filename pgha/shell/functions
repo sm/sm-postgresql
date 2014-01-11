@@ -33,6 +33,19 @@ saveIPs() {
   echo ${replicaIPs[*]} > ${replicasFile}
 }
 
+saveToEtcd() {
+  curl -L http://${masterIP}:4001/v2/keys/pgha/master/ip -XPUT -d value="${masterIP}"
+  curl -L http://${masterIP}:4001/v2/keys/pgha/sync/ip -XPUT -d value="${syncIP}"
+  curl -L http://${masterIP}:4001/v2/keys/pgha/asyncs/ips -XPUT -d value="${replicaIPs[*]}"
+
+  replicaNumber=1
+  for replicaIP in ${replicaIPs[@]}
+  do
+    curl -L http://${masterIP}:4001/v2/keys/pgha/async/${replicaNumber}/ip -XPUT -d value="${replicaIP}"
+    let replicaNumber+=1
+  done
+}
+
 setMyRole() {
   myRole="new"
   for addr in ${myIPs[@]}
