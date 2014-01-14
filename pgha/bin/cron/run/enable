@@ -3,19 +3,14 @@
 typeset -x masterIp PGDATA masterFile debug entry pghaPath
 debug=0
 
-if [[ -z ${masterIp} ]]
-then log fail "'master <ip>' must be given"
-fi
+require_postgres_user
+require_master_ip
+require_pgdata
 
-if [[ -z ${PGDATA} ]]
-then log fail "'pgdata <PGDATA>' must be given"
-fi
-
+# TODO: Remove the directory below to use etcd.
 pghaPath=${PGDATA}/../pgha # Parallel to PGDATA
 masterFile=${pghaPath}/master
-
 mkdir -p ${pghaPath}
-echo ${masterIp} > ${masterFile}
 chown -R postgres:postgres ${pghaPath}
 
 if (( debug == 0 ))
@@ -23,7 +18,7 @@ then entry="* * * * * PGDATA=${PGDATA} /opt/sm/bin/sm pgha run"
 else entry="* * * * * DEBUG=1 PGDATA=${PGDATA} /opt/sm/bin/sm pgha run"
 fi
 
-if ! crontab -l | grep -q pgha
+if ! crontab -l | grep -q 'pgha run'
 then (crontab -l ; echo ${entry}) | crontab -
 fi
 

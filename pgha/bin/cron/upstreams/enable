@@ -1,0 +1,14 @@
+#!/bin/sh
+
+require_root_user
+require_master_ip
+
+if (( debug == 0 ))
+then entry="* * * * * /opt/sm/bin/sm pgha nginx upstreams"
+else entry="* * * * * DEBUG=1 /opt/sm/bin/sm pgha nginx upstreams"
+fi
+
+if ! crontab -l | grep -q 'pgha nginx upstreams'
+then (crontab -l ; echo ${entry}) | crontab -
+fi
+

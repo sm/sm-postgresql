@@ -69,9 +69,12 @@ saveIPs() {
 }
 
 saveToEtcd() {
-  curl -L http://${masterIP}:4001/v2/keys/pgha/master/ip -XPUT -d value="${masterIP}" -d ttl=120
-  curl -L http://${masterIP}:4001/v2/keys/pgha/sync/ip -XPUT -d value="${syncIP}" -d ttl=120
-  curl -L http://${masterIP}:4001/v2/keys/pgha/asyncs/ips -XPUT -d value="${replicaIPs[*]}" -d ttl=120
+  #curl -L http://${masterIP}:4001/v2/keys/pgha/master/ip -XPUT -d value="${masterIP}" -d ttl=120
+  #curl -L http://${masterIP}:4001/v2/keys/pgha/sync/ip -XPUT -d value="${syncIP}" -d ttl=120
+  #curl -L http://${masterIP}:4001/v2/keys/pgha/asyncs/ips -XPUT -d value="${replicaIPs[*]}" -d ttl=120
+  etcd_ctl set pgha/master/ip "${masterIP}"
+  etcd_ctl set pgha/sync/ip "${syncIP}"
+  etcd_ctl set pgha/asyncs/ips "${replicaIPs[*]}"
 }
 
 setMyRole() {
@@ -169,9 +172,17 @@ read_pgha_ips() {
 require_postgres_user() {
   # TODO: IF user is root, re-exec as postgres
   if [[ $USER != 'postgres' ]]
-  then log error "pgha actions must be run as user 'postgres'"
+  then log error "this pgha action must be run as user 'postgres'"
   fi
 }
+
+require_root_user() {
+  # TODO: IF user is root, re-exec as postgres
+  if (( UID > 0 ))
+  then log error "this pgha action must be run as user 'root'"
+  fi
+}
+
 
 require_etcd_ip() {
   if [[ -z ${etcd_ip} ]]
@@ -185,3 +196,8 @@ require_pgdata() {
   fi
 }
 
+require_master_ip() {
+  if [[ -z ${masterIP} ]]
+  then log fail "'master <ip>' must be set in etcd."
+  fi
+}

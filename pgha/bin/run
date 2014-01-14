@@ -25,11 +25,7 @@
 # Keep track of where we go next.
 #
 
-if [[ -z ${masterIP} ]]
-then
-    echo "ERROR: pgha can not run, a master IP has not been set in ${masterFile}"
-    exit 1
-fi
+require_master_ip
 
 (( ${DEBUG:=0} == 0 )) || set -x
 
@@ -49,16 +45,16 @@ setMyRole
 
 case ${myRole} in
   (master)
-    saveIPs
+    saveIPs # TODO: Replace this with etcd.
     if isResponsive ${masterIP}
-      then saveToEtcd
+    then saveToEtcd
     fi
     ;;
   (sync)
     if ! isResponsive ${masterIP}
     then promoteToMaster
     fi
-    saveIPs
+    saveIPs # TODO: Replace this with etcd.
     ;;
   (replica)
     if isResponsive ${masterIP}
@@ -70,7 +66,7 @@ case ${myRole} in
       if replicateFromMaster
       then
         loadIPs
-        saveIPs
+        saveIPs # TODO: Replace this with etcd.
       fi
     else # master and sync replica are offline...
       if (( ${#replicaIPs} == 1 ))
@@ -85,7 +81,7 @@ case ${myRole} in
           if replicateFromMaster
           then
             loadIPs
-            saveIPs
+            saveIPs # TODO: Replace this with etcd.
           fi
         fi
       fi
@@ -97,7 +93,7 @@ case ${myRole} in
       if replicateFromMaster
       then
         loadIPs
-        saveIPs
+        saveIPs # TODO: Replace this with etcd.
       fi
     elif [[ -n "${syncIP}" ]] && isResponsive ${syncIP}
     then
@@ -105,7 +101,7 @@ case ${myRole} in
       if replicateFromMaster
       then
         loadIPs
-        saveIPs
+        saveIPs # TODO: Replace this with etcd.
       fi
     fi
     ;;
