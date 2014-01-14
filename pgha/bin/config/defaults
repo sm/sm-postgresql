@@ -1,1 +1,2 @@
 etcd_ip=127.0.0.1
+etcd_port=4001

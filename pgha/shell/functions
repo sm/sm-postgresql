@@ -18,6 +18,9 @@ parse_args() {
       (etcd_ip)
         array shift extension_args into etcd_ip
         ;;
+      (etcd_port)
+        array shift extension_args into etcd_port
+        ;;
       (debug)
         DEBUG=1
         ;;
@@ -142,10 +145,11 @@ replicationIsStarting() {
 
 read_config_defaults() {
   config read file defaults key etcd_ip from pgha
+  config read file defaults key etcd_port from pgha
 }
 
 etcd_ctl() {
-  etcdctl -C ${etcd_ip}:4001 "$@"
+  etcdctl -C ${etcd_ip}:${etcd_port} "$@"
 }
 
 ips_from() {
@@ -157,9 +161,9 @@ read_pgha_ips() {
   syncIP=$(etcd_ctl get pgha/sync/ip)
   asyncIPs=($(etcd_ctl get pgha/async/ips | sort))
   replicaIPs=(${syncIP} ${asyncIPs[@]})
-  current_master=$(ips_from /etc/nginx/upstreams/master)
-  current_sync=$(ips_from /etc/nginx/upstreams/sync)
-  current_async=$(ips_from /etc/nginx/upstreams/async)
+  current_master=$(ips_from /etc/nginx/tcp/upstreams/master)
+  current_sync=$(ips_from /etc/nginx/tcp/upstreams/sync)
+  current_async=$(ips_from /etc/nginx/tcp/upstreams/async)
 }
 
 require_postgres_user() {

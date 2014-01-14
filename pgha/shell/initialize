@@ -1,11 +1,9 @@
 #!/bin/sh
 
-typeset -x timestamp masterFile syncFile replicasFile replicatingFile myRole 
-typeset -x pghaPath syncIP masterIP firstReplica PGDATA DEBUG pghaLog etcd_ip
-declare -ax replicaIPs myIPs args
-
-typeset -x expected_master expected_sync current_master current_sync
-declare -ax asyncdirs expected_async current_async
+typeset -x timestamp masterFile syncFile replicasFile replicatingFile myRole \
+  pghaLog pghaPath syncIP masterIP firstReplica PGDATA DEBUG etcd_ip etcd_port \
+  expected_master expected_sync current_master current_sync
+declare -ax replicaIPs myIPs args asyncdirs expected_async current_async
 
 export PATH="/bin:/usr/bin:/sbin:/usr/sbin:/opt/sm/pkg/active/bin:/usr/local/bin"
 (( ${DEBUG:=0} == 0 )) || set -x

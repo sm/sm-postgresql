@@ -15,21 +15,21 @@ then
 
 	#Rewrite master file
 	echo "upstream master {\n\tserver ${masterIP}:5432;\n}" \
-		> /etc/nginx/upstreams/master
+		> /etc/nginx/tcp/upstreams/master
 
 	#Rewrite sync file
 	echo -e "upstream sync {\n\tserver ${syncIP}:5432;\n}" \
-		> /etc/nginx/upstreams/sync
+		> /etc/nginx/tcp/upstreams/sync
 
 	for line in ${asyncIPs[@]} ; do asyncs+="\tserver $line:5432;" ; done
 
 	#Write out async file
-	echo -e "upstream async {\n${upstream}\n}" \
-		> /etc/nginx/upstreams/async
+	echo -e "upstream async {\n${asyncs}\n}" \
+		> /etc/nginx/tcp/upstreams/async
 
 	#Write out replicas file (sync + asyncs)
 	echo -e "upstream replicas {\n\tserver ${syncIP}:5432;\n${asyncs}\n}" \
-		> /etc/nginx/upstreams/replicas
+		> /etc/nginx/tcp/upstreams/replicas
 
 	sm nginx restart
 fi

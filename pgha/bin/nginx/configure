@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 
-mkdir -p /etc/nginx/servers/ /etc/nginx/upstreams
+mkdir -p /etc/nginx/tcp/{servers,upstreams}
 
 template install  "pgha/nginx.pgha.conf" \
-	to "/etc/nginx/servers/pgha.conf" \
+	to "/etc/nginx/tcp/servers/pgha.conf" \
 	mode 0644 \
 	owner nginx:nginx
 
 for upstream in master sync async replicas
 do
-	echo -e "upstream ${upstream} {\n\tserver 127.0.0.1:5432;\n}" > /etc/nginx/upstreams/${upstream}
-	chmod 0644 /etc/nginx/upstreams/${upstream}
+	echo -e "upstream ${upstream} {\n\tserver 127.0.0.1:5432;\n}" \
+		> /etc/nginx/upstreams/${upstream}
+	chmod 0644 /etc/nginx/tcp/upstreams/${upstream}
 done
 
