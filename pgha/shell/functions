@@ -152,10 +152,6 @@ ips_from() {
   sed -n 's/server \(.*\):.*/\1/p' $* | sort
 }
 
-read_master_ip() {
-  masterIP=$(etcd_ctl get pgha/master/ip)
-}
-
 read_pgha_ips() {
   masterIP=$(etcd_ctl get pgha/master/ip)
   syncIP=$(etcd_ctl get pgha/sync/ip)

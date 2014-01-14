@@ -31,6 +31,5 @@ then
 	echo -e "upstream replicas {\n\tserver ${syncIP}:5432;\n${asyncs}\n}" \
 		> /etc/nginx/upstreams/replicas
 
-	#Restart nginx
 	sm nginx restart
 fi
