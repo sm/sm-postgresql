@@ -50,6 +50,9 @@ postgresql_cli()
         if variable is empty user
         then log error "The system user name of PostgreSQL on the master server must be specified after keyword 'user'" ; fi
         ;;
+      (fast|smart|immediate)
+        mode_flag="-m ${token}"
+          ;;
       (*)
         if variable is nonempty token
         then

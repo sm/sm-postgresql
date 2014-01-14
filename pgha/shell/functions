@@ -1,5 +1,36 @@
 #!/bin/sh
 
+parse_args() {
+  declare -a new_args
+  while (( ${#extension_args} > 0 ))
+  do
+    array shift extension_args into token
+    case ${token} in
+      (pgha)
+        continue
+        ;;
+      (master)
+        array shift extension_args into masterIp
+        ;;
+      (pgdata)
+        array shift extension_args into PGDATA
+        ;;
+      (etcd_ip)
+        array shift extension_args into etcd_ip
+        ;;
+      (debug)
+        DEBUG=1
+        ;;
+      (*)
+        if variable is nonempty token
+        then new_args+=("${token}")
+        fi
+        ;;
+    esac
+  done
+  extension_args=("${new_args[@]}")
+}
+
 loadIPs() {
   local _ipSQL _syncSQL _replicaSQL
   if [[ -n ${masterIP} ]]
@@ -20,6 +51,7 @@ isResponsive() {
     echo "ERROR: isResponsive called without ip!"
     return 1
   fi
+
   if psql -h ${_ip} postgres -t -A -c "select '${_ip} is responsive';"
   then return 0
   else return 1
@@ -56,11 +88,13 @@ setMyRole() {
       myRole="master"
       break
     fi
+
     if [[ ${addr} == ${syncIP} ]] 
     then 
       myRole="sync"
       break
     fi
+
     for replicaIP in ${replicaIPs[@]}
     do
       if [[ ${addr} == ${replicaIP} ]] 
@@ -76,6 +110,7 @@ setMyRole() {
 replicateFromMaster() {
   local _status
   echo $$ > ${replicatingFile}
+
   if /opt/sm/bin/sm postgresql replication configure master "${masterIP}"
   then _status=0
   else _status=1
@@ -89,7 +124,9 @@ replicateFromMaster() {
 isReplicating() {
   local _ip
   _ip="${1}"
+
   readOnly=$(psql -h "${_ip}" postgres -t -A -c "SHOW transaction_read_only;")
+
   if [[ ${readOnly} == "on" ]]
   then return 0
   else return 1
@@ -110,3 +147,49 @@ replicationIsStarting() {
   else return 1
   fi
 }
+
+read_config_defaults() {
+  config read file defaults key etcd_ip from pgha
+}
+
+etcd_ctl() {
+  etcdctl -C ${etcd_ip}:4001 "$@"
+}
+
+ips_from() {
+  sed -n 's/server \(.*\):.*/\1/p' $* | sort
+}
+
+read_master_ip() {
+  masterIP=$(etcd_ctl get pgha/master/ip)
+}
+
+read_pgha_ips() {
+  masterIP=$(etcd_ctl get pgha/master/ip)
+  syncIP=$(etcd_ctl get pgha/sync/ip)
+  asyncIPs=($(etcd_ctl get pgha/async/ips | sort))
+  replicaIPs=(${syncIP} ${asyncIPs[@]})
+  current_master=$(ips_from /etc/nginx/upstreams/master)
+  current_sync=$(ips_from /etc/nginx/upstreams/sync)
+  current_async=$(ips_from /etc/nginx/upstreams/async)
+}
+
+require_postgres_user() {
+  # TODO: IF user is root, re-exec as postgres
+  if [[ $USER != 'postgres' ]]
+  then log error "pgha actions must be run as user 'postgres'"
+  fi
+}
+
+require_etcd_ip() {
+  if [[ -z ${etcd_ip} ]]
+  then log error "ERROR: ${etcd_ip} must be given or set."
+  fi
+}
+
+require_pgdata() {
+  if [[ -z ${PGDATA} ]]
+  then log error "environment variable 'PGDATA' must be set."
+  fi
+}
+

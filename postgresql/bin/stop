@@ -2,12 +2,12 @@
 
 if [[ "$USER" == "${service_user}" ]]
 then
-  exec "${service_bin_path}/pg_ctl" stop -D "${service_data_path}"
+  exec "${service_bin_path}/pg_ctl" stop ${mode_flag} -D "${service_data_path}"
 
 elif user is root
 then
   exec su "${service_user}" \
-    -c "${service_bin_path}/pg_ctl stop -D '${service_data_path}'"
+    -c "${service_bin_path}/pg_ctl stop ${mode_flag} -D '${service_data_path}'"
 
 else
   log fail "postgresql stop may only be run as either root or ${service_user}"

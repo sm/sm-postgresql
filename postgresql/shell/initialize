@@ -1,7 +1,8 @@
 #!/bin/sh
 
 typeset -g json_file file service_user service_data_path master replica port \
-  password user identity ssh_port ssh_identity ssh_options major_minor_version
+  password user identity ssh_port ssh_identity ssh_options major_minor_version \
+  mode_flag
 typeset -ga _initdb_flags configure_flags >/dev/null 2>&1 # Don't care if declared already.
 typeset -gx PGDATA
 

@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+require_etcd_ip
+
+read_pgha_ips
+
+typeset expected current
+
+expected="${masterIP} ${syncIP} ${asyncIPs[*]}"
+current="${current_master} ${current_sync} ${current_async[*]}"
+
+if [[ ${expected} != ${current} ]]
+then
+	typeset asyncs
+
+	#Rewrite master file
+	echo "upstream master {\n\tserver ${masterIP}:5432;\n}" \
+		> /etc/nginx/upstreams/master
+
+	#Rewrite sync file
+	echo -e "upstream sync {\n\tserver ${syncIP}:5432;\n}" \
+		> /etc/nginx/upstreams/sync
+
+	for line in ${asyncIPs[@]} ; do asyncs+="\tserver $line:5432;" ; done
+
+	#Write out async file
+	echo -e "upstream async {\n${upstream}\n}" \
+		> /etc/nginx/upstreams/async
+
+	#Write out replicas file (sync + asyncs)
+	echo -e "upstream replicas {\n\tserver ${syncIP}:5432;\n${asyncs}\n}" \
+		> /etc/nginx/upstreams/replicas
+
+	#Restart nginx
+	sm nginx restart
+fi
