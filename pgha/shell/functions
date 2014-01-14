@@ -39,7 +39,7 @@ saveToEtcd() {
   curl -L http://${masterIP}:4001/v2/keys/pgha/asyncs/ips -XPUT -d value="${replicaIPs[*]}" -d ttl=120
 
   replicaNumber=1
-  curl -L 'http://${masterIP}:4001/v2/keys/pgha/async?recursive=true' -XDELETE
+  curl -L "http://${masterIP}:4001/v2/keys/pgha/async?recursive=true" -XDELETE
   for replicaIP in ${replicaIPs[@]}
   do
     curl -L http://${masterIP}:4001/v2/keys/pgha/async/${replicaNumber}/ip -XPUT -d value="${replicaIP}" -d ttl=120
