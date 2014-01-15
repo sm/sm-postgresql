@@ -25,6 +25,8 @@
 # Keep track of where we go next.
 #
 
+require_postgres_user
+
 require_master_ip
 
 (( ${DEBUG:=0} == 0 )) || set -x

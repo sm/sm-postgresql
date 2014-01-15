@@ -1,5 +1,7 @@
 #!/bin/sh
 
+require_postgres_user
+
 if crontab -l | grep -q pgha 
 then (crontab -l | grep -v pgha) | crontab -
 fi

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# TODO: Account for etcd.
+
 if [[ -s ${pghaLog} ]]
 then tail -n 100 ${pghaLog}
 fi

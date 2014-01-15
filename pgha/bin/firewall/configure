@@ -1,5 +1,7 @@
 #!/bin/sh
 
+require_root_user
+
 osRelease=$(cat /etc/*release* | tr '\n' ' ')
 case "${osRelease}" in
 	(*CentOS*)

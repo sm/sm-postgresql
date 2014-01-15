@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+require_root_user
+
 require_etcd_ip
 
 read_pgha_ips

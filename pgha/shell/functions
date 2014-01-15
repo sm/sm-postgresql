@@ -156,7 +156,9 @@ etcd_ctl() {
 }
 
 ips_from() {
-  sed -n 's/server \(.*\):.*/\1/p' $* | sort
+  if [[ -s $1 ]]
+  then sed -n 's/server \(.*\):.*/\1/p' $* | sort
+  fi
 }
 
 read_pgha_ips() {

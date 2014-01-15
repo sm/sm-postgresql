@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+require_root_user
+
 mkdir -p /etc/nginx/tcp/{servers,upstreams}
 
 template install  "pgha/nginx.pgha.conf" \
