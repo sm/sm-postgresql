@@ -15,6 +15,11 @@ parse_args() {
       (pgdata)
         array shift extension_args into PGDATA
         ;;
+      (tags)
+        declare -a tgs
+        array shift extension_args into tgs
+        tags=($(echo $tgs | tr ',' ' '))
+        ;;
       (etcd_ip)
         array shift extension_args into etcd_ip
         ;;

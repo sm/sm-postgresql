@@ -3,7 +3,9 @@
 typeset -x timestamp masterFile syncFile replicasFile replicatingFile myRole \
   pghaLog pghaPath syncIP masterIP firstReplica PGDATA DEBUG etcd_ip etcd_port \
   expected_master expected_sync current_master current_sync
-declare -ax replicaIPs myIPs args asyncdirs expected_async current_async asyncIPs
+
+declare -ax replicaIPs myIPs args asyncdirs expected_async current_async asyncIPs \
+  tags
 
 export PATH="/bin:/usr/bin:/sbin:/usr/sbin:/opt/sm/pkg/active/bin:/usr/local/bin"
 (( ${DEBUG:=0} == 0 )) || set -x

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+for tag in ${tags[@]}
+do
+	case ${tag} in
+		(pglb)                   sm nginx stop ; sm nginx start ;;
+		(postgres|postgresql|pg) sm postgresql stop ; sm postgresql start ;;
+		(master)                 sm postgresql stop ; sm postgresql start ;;
+		(replica)                sm postgresql stop ; sm postgresql start ;;
+		(*) echo "Unhandled tag '${tag}', skipping." ;;
+	esac
+done
+
