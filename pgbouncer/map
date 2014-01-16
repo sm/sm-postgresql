@@ -1,3 +1,0 @@
-versions/available=pgbouncer_versions_available()
-versions/latest=pgbouncer_versions_latest()
-version/url=pgbouncer_version_url()

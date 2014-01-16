@@ -1,0 +1,4 @@
+#!/bin/sh
+
+pgbouncer -d /etc/pgbouncer/pgbouncer.conf
+
