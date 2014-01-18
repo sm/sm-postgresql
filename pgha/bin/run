@@ -19,7 +19,7 @@
 # - multiple failures including both master and sync.
 #
 # Questions:
-#  - Should we save the original MasterIP when sync is promoted?  Not unless we want to report back 
+#  - Should we save the original master_ip when sync is promoted?  Not unless we want to report back 
 #    to some central authority that the server pool lost a server
 #
 # Keep track of where we go next.
@@ -39,7 +39,7 @@ if replicationIsStarting
 then exit 0
 fi
 
-if isResponsive ${masterIP}
+if isResponsive ${master_ip}
 then loadIPs
 fi
 
@@ -48,38 +48,38 @@ setMyRole
 case ${myRole} in
   (master)
     saveIPs # TODO: Replace this with etcd.
-    if isResponsive ${masterIP}
+    if isResponsive ${master_ip}
     then saveToEtcd
     fi
     ;;
   (sync)
-    if ! isResponsive ${masterIP}
+    if ! isResponsive ${master_ip}
     then promoteToMaster
     fi
     saveIPs # TODO: Replace this with etcd.
     ;;
   (replica)
-    if isResponsive ${masterIP}
+    if isResponsive ${master_ip}
     then 
       saveIPs
-    elif [[ -n ${syncIP} ]] && isResponsive ${syncIP}
+    elif [[ -n ${sync_ip} ]] && isResponsive ${sync_ip}
     then 
-      masterIP=${syncIP}
+      master_ip=${sync_ip}
       if replicateFromMaster
       then
         loadIPs
         saveIPs # TODO: Replace this with etcd.
       fi
     else # master and sync replica are offline...
-      if (( ${#replicaIPs} == 1 ))
+      if (( ${#replica_ips} == 1 ))
       then # I am a replica and no other replicas exist.
         promoteToMaster
-      elif  (( ${#replicaIPs} > 1 ))
+      elif  (( ${#replica_ips} > 1 ))
       then
-        firstReplica=${replicaIPs[1]}
+        firstReplica=${replica_ips[1]}
         if isResponsive ${firstReplica}
         then
-          masterIP=${firstReplica}
+          master_ip=${firstReplica}
           if replicateFromMaster
           then
             loadIPs
@@ -90,16 +90,16 @@ case ${myRole} in
     fi
     ;;
   (new)
-    if isResponsive ${masterIP}
+    if isResponsive ${master_ip}
     then
       if replicateFromMaster
       then
         loadIPs
         saveIPs # TODO: Replace this with etcd.
       fi
-    elif [[ -n "${syncIP}" ]] && isResponsive ${syncIP}
+    elif [[ -n "${sync_ip}" ]] && isResponsive ${sync_ip}
     then
-      masterIP=${syncIP}
+      master_ip=${sync_ip}
       if replicateFromMaster
       then
         loadIPs

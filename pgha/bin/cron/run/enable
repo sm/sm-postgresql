@@ -1,6 +1,6 @@
 #!/bin/sh
 
-typeset -x masterIp PGDATA masterFile debug entry pghaPath
+typeset -x master_ip PGDATA masterFile debug entry pghaPath
 debug=0
 
 require_postgres_user

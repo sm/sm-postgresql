@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+if variable is empty my_ip
+then log error "my_ip must be given to initialize pgha."
+fi
+
+for tag in ${tags[@]}
+do
+	case ${tag} in
+		(master)                 
+			etcd_ctl set pgha/master/ip "${my_ip}"
+			;;
+	esac
+done
+
+

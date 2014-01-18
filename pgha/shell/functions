@@ -10,7 +10,7 @@ parse_args() {
         continue
         ;;
       (master)
-        array shift extension_args into masterIp
+        array shift extension_args into master_ip
         ;;
       (pgdata)
         array shift extension_args into PGDATA
@@ -25,6 +25,9 @@ parse_args() {
         ;;
       (etcd_port)
         array shift extension_args into etcd_port
+        ;;
+      (my_ip)
+        array shift extension_args into my_ip
         ;;
       (debug)
         DEBUG=1
@@ -41,13 +44,13 @@ parse_args() {
 
 loadIPs() {
   local _ipSQL _syncSQL _replicaSQL
-  if [[ -n ${masterIP} ]]
+  if [[ -n ${master_ip} ]]
   then
     _ipSQL="SELECT client_addr FROM pg_stat_replication "
     _syncSQL="${_ipSQL} WHERE sync_state='sync';"
     _replicaSQL="${_ipSQL} WHERE sync_state='potential' ORDER BY client_addr DESC;"
-    syncIP=$(psql -h "${masterIP}" postgres -t -A -c "${_syncSQL}")
-    replicaIPs=($(psql -h "${masterIP}" postgres -t -A -c "${_replicaSQL}"))
+    sync_ip=$(psql -h "${master_ip}" postgres -t -A -c "${_syncSQL}")
+    replica_ips=($(psql -h "${master_ip}" postgres -t -A -c "${_replicaSQL}"))
   fi
 }
 
@@ -68,37 +71,37 @@ isResponsive() {
 
 saveIPs() {
   mkdir -p ${pghaPath} # Ensure the pgha path exists
-  echo ${masterIP} > ${masterFile}
-  echo ${syncIP} > ${syncFile}
-  echo ${replicaIPs[*]} > ${replicasFile}
+  echo ${master_ip} > ${masterFile}
+  echo ${sync_ip} > ${syncFile}
+  echo ${replica_ips[*]} > ${replicasFile}
 }
 
 saveToEtcd() {
-  #curl -L http://${masterIP}:4001/v2/keys/pgha/master/ip -XPUT -d value="${masterIP}" -d ttl=120
-  #curl -L http://${masterIP}:4001/v2/keys/pgha/sync/ip -XPUT -d value="${syncIP}" -d ttl=120
-  #curl -L http://${masterIP}:4001/v2/keys/pgha/asyncs/ips -XPUT -d value="${replicaIPs[*]}" -d ttl=120
-  etcd_ctl set pgha/master/ip "${masterIP}"
-  etcd_ctl set pgha/sync/ip "${syncIP}"
-  etcd_ctl set pgha/asyncs/ips "${replicaIPs[*]}"
+  #curl -L http://${master_ip}:4001/v2/keys/pgha/master/ip -XPUT -d value="${master_ip}" -d ttl=120
+  #curl -L http://${master_ip}:4001/v2/keys/pgha/sync/ip -XPUT -d value="${sync_ip}" -d ttl=120
+  #curl -L http://${master_ip}:4001/v2/keys/pgha/asyncs/ips -XPUT -d value="${replica_ips[*]}" -d ttl=120
+  etcd_ctl set pgha/master/ip "${master_ip}"
+  etcd_ctl set pgha/sync/ip "${sync_ip}"
+  etcd_ctl set pgha/asyncs/ips "${replica_ips[*]}"
 }
 
 setMyRole() {
   myRole="new"
-  for addr in ${myIPs[@]}
+  for addr in ${my_ips[@]}
   do 
-    if [[ ${addr} == ${masterIP} ]] 
+    if [[ ${addr} == ${master_ip} ]] 
     then 
       myRole="master"
       break
     fi
 
-    if [[ ${addr} == ${syncIP} ]] 
+    if [[ ${addr} == ${sync_ip} ]] 
     then 
       myRole="sync"
       break
     fi
 
-    for replicaIP in ${replicaIPs[@]}
+    for replicaIP in ${replica_ips[@]}
     do
       if [[ ${addr} == ${replicaIP} ]] 
       then 
@@ -114,7 +117,7 @@ replicateFromMaster() {
   local _status
   echo $$ > ${replicatingFile}
 
-  if /opt/sm/bin/sm postgresql replication configure master "${masterIP}"
+  if /opt/sm/bin/sm postgresql replication configure master "${master_ip}"
   then _status=0
   else _status=1
   fi
@@ -139,9 +142,9 @@ isReplicating() {
 promoteToMaster() {
   #touch ${PGDATA}/failover
   /opt/sm/bin/sm postgresql replication promote
-  masterIP=${syncIP}
-  syncIP=""
-  replicaIPs=()
+  master_ip=${sync_ip}
+  sync_ip=""
+  replica_ips=()
 }
 
 replicationIsStarting() {
@@ -167,10 +170,10 @@ ips_from() {
 }
 
 read_pgha_ips() {
-  masterIP=$(etcd_ctl get pgha/master/ip)
-  syncIP=$(etcd_ctl get pgha/sync/ip)
-  asyncIPs=($(etcd_ctl get pgha/async/ips | sort))
-  replicaIPs=(${syncIP} ${asyncIPs[@]})
+  master_ip=$(etcd_ctl get pgha/master/ip)
+  sync_ip=$(etcd_ctl get pgha/sync/ip)
+  async_ips=($(etcd_ctl get pgha/async/ips | sort))
+  replica_ips=(${sync_ip} ${async_ips[@]})
   current_master=$(ips_from /etc/nginx/tcp/upstreams/master)
   current_sync=$(ips_from /etc/nginx/tcp/upstreams/sync)
   current_async=$(ips_from /etc/nginx/tcp/upstreams/async)
@@ -204,7 +207,7 @@ require_pgdata() {
 }
 
 require_master_ip() {
-  if [[ -z ${masterIP} ]]
+  if [[ -z ${master_ip} ]]
   then log fail "'master <ip>' must be set in etcd."
   fi
 }

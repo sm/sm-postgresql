@@ -7,15 +7,15 @@ then tail -n 100 ${pghaLog}
 fi
 
 echo "
-masterIP: ${masterIP}
-syncIP: ${syncIP}
-replicaIPs: ${replicaIPs[*]}
+master_ip: ${master_ip}
+sync_ip: ${sync_ip}
+replica_ips: ${replica_ips[*]}
 "
 if [[ -s ${replicatingFile} ]]
 then echo "replicatingSince: $(cat ${replicatingFile})"
 fi
 
-if isResponsive ${masterIP}
+if isResponsive ${master_ip}
 then echo "master: online"
 else echo "master: offline"
 fi

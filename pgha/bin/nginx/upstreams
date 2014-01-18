@@ -8,7 +8,7 @@ read_pgha_ips
 
 typeset expected current
 
-expected="${masterIP} ${syncIP} ${asyncIPs[*]}"
+expected="${master_ip} ${sync_ip} ${async_ips[*]}"
 current="${current_master} ${current_sync} ${current_async[*]}"
 
 if [[ ${expected} != ${current} ]]
@@ -16,21 +16,21 @@ then
 	typeset asyncs
 
 	#Rewrite master file
-	echo "upstream master {\n\tserver ${masterIP}:5432;\n}" \
+	echo "upstream master {\n\tserver ${master_ip}:5432;\n}" \
 		> /etc/nginx/tcp/upstreams/master
 
 	#Rewrite sync file
-	echo -e "upstream sync {\n\tserver ${syncIP}:5432;\n}" \
+	echo -e "upstream sync {\n\tserver ${sync_ip}:5432;\n}" \
 		> /etc/nginx/tcp/upstreams/sync
 
-	for line in ${asyncIPs[@]} ; do asyncs+="\tserver $line:5432;" ; done
+	for line in ${async_ips[@]} ; do asyncs+="\tserver $line:5432;" ; done
 
 	#Write out async file
 	echo -e "upstream async {\n${asyncs}\n}" \
 		> /etc/nginx/tcp/upstreams/async
 
 	#Write out replicas file (sync + asyncs)
-	echo -e "upstream replicas {\n\tserver ${syncIP}:5432;\n${asyncs}\n}" \
+	echo -e "upstream replicas {\n\tserver ${sync_ip}:5432;\n${asyncs}\n}" \
 		> /etc/nginx/tcp/upstreams/replicas
 
 	sm nginx restart
