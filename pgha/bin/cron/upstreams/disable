@@ -1,6 +1,6 @@
 #!/bin/sh
 
-require_root_user
+require_user root
 
 if crontab -l | grep -q 'pgha nginx upstreams'
 then (crontab -l | grep -v 'pgha nginx upstreams') | crontab -

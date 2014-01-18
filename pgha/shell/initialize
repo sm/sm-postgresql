@@ -1,8 +1,8 @@
 #!/bin/sh
 
-typeset -x timestamp masterFile syncFile replicasFile replicatingFile myRole \
-  pghaLog pghaPath sync_ip master_ip firstReplica PGDATA DEBUG etcd_addr \
-  expected_master expected_sync current_master current_sync
+typeset -x timestamp master_file sync_file replicas_file replicating_file my_role \
+  pgha_log pgha_path sync_ip master_ip firstReplica PGDATA DEBUG etcd_addr \
+  expected_master expected_sync current_master current_sync pgha_conf
 
 declare -ax replica_ips my_ips args asyncdirs expected_async current_async async_ips \
   tags
@@ -14,16 +14,17 @@ read_config_defaults
 
 read_config
 
-require_pgdata
+require_variables PGDATA
 
 parse_args
 
-pghaPath=${PGDATA}/../pgha
-pghaLog=${pghaPath}/pgha.log
-masterFile=${pghaPath}/master
-syncFile=${pghaPath}/sync
-replicasFile=${pghaPath}/replicas
-replicatingFile=${pghaPath}/replicating
+pgha_path=${PGDATA}/../pgha
+pgha_log=${pgha_path}/pgha.log
+pgha_conf=/etc/pgha/pgha.conf
+master_file=${pgha_path}/master
+sync_file=${pgha_path}/sync
+replicas_file=${pgha_path}/replicas
+replicating_file=${pgha_path}/replicating
 
 timestamp=$(date +"%Y-%m-%dT%H:%M:%S")
 

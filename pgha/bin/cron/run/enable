@@ -1,17 +1,16 @@
 #!/bin/sh
 
-typeset -x master_ip PGDATA masterFile debug entry pghaPath
+typeset -x master_ip PGDATA master_file debug entry pgha_path
 debug=0
 
-require_postgres_user
-require_master_ip
-require_pgdata
+require_user postgres
+require_variables master_ip PGDATA
 
 # TODO: Remove the directory below to use etcd.
-pghaPath=${PGDATA}/../pgha # Parallel to PGDATA
-masterFile=${pghaPath}/master
-mkdir -p ${pghaPath}
-chown -R postgres:postgres ${pghaPath}
+pgha_path=${PGDATA}/../pgha # Parallel to PGDATA
+master_file=${pgha_path}/master
+mkdir -p ${pgha_path}
+chown -R postgres:postgres ${pgha_path}
 
 if (( debug == 0 ))
 then entry="* * * * * PGDATA=${PGDATA} /opt/sm/bin/sm pgha run"

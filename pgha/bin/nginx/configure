@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-require_root_user
+require_user root
 
 mkdir -p /etc/nginx/tcp/{servers,upstreams}
 

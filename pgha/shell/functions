@@ -67,10 +67,10 @@ isResponsive() {
 }
 
 saveIPs() {
-  mkdir -p ${pghaPath} # Ensure the pgha path exists
-  echo ${master_ip} > ${masterFile}
-  echo ${sync_ip} > ${syncFile}
-  echo ${replica_ips[*]} > ${replicasFile}
+  mkdir -p ${pgha_path} # Ensure the pgha path exists
+  echo ${master_ip} > ${master_file}
+  echo ${sync_ip} > ${sync_file}
+  echo ${replica_ips[*]} > ${replicas_file}
 }
 
 saveToEtcd() {
@@ -83,18 +83,18 @@ saveToEtcd() {
 }
 
 setMyRole() {
-  myRole="new"
+  my_role="new"
   for addr in ${my_ips[@]}
   do 
     if [[ ${addr} == ${master_ip} ]] 
     then 
-      myRole="master"
+      my_role="master"
       break
     fi
 
     if [[ ${addr} == ${sync_ip} ]] 
     then 
-      myRole="sync"
+      my_role="sync"
       break
     fi
 
@@ -102,7 +102,7 @@ setMyRole() {
     do
       if [[ ${addr} == ${replicaIP} ]] 
       then 
-        myRole="replica"
+        my_role="replica"
         break
       fi
     done
@@ -112,7 +112,7 @@ setMyRole() {
 
 replicateFromMaster() {
   local _status
-  echo $$ > ${replicatingFile}
+  echo $$ > ${replicating_file}
 
   if /opt/sm/bin/sm postgresql replication configure master "${master_ip}"
   then _status=0
@@ -120,7 +120,7 @@ replicateFromMaster() {
   fi
   # Need to guarantee the replicating file is removed and the master IP is saved
   # Hence the if statement above to catch every case.
-  rm -f ${replicatingFile}
+  rm -f ${replicating_file}
   return ${_status}
 }
 
@@ -145,7 +145,7 @@ promoteToMaster() {
 }
 
 replicationIsStarting() {
-  if [[ -s ${replicatingFile} ]] 
+  if [[ -s ${replicating_file} ]] 
   then return 0
   else return 1
   fi
@@ -156,13 +156,17 @@ read_config_defaults() {
 }
 
 read_config() {
-  local _addr
-  if file exists /etc/pgha/pgha.conf
+  local _addr _key _value
+  if file exists ${pgha_conf}
   then 
-    _addr=$(awk -F= '/^etcd_addr=/' /etc/pgha/pgha.conf)
-    if variable is nonempty _addr
-    then etcd_addr="${_addr}"
-    fi
+    for _key in etcd_addr my_ip tags
+    do
+      _value=$(awk -F= "/^${_key}=/{print \$2}" ${pgha_conf})
+      if variable is nonempty ${_value}
+      then eval "${_key}=${_value}"
+      fi
+      unset _value
+    done
   fi
 }
 
@@ -186,35 +190,19 @@ read_pgha_ips() {
   current_async=$(ips_from /etc/nginx/tcp/upstreams/async)
 }
 
-require_postgres_user() {
-  # TODO: IF user is root, re-exec as postgres
-  if [[ $USER != 'postgres' ]]
-  then log error "this pgha action must be run as user 'postgres'"
+require_variables() {
+  local _variable
+  for _variable in ${@}
+  do
+    if variable is empty ${_variable}
+    then log error "ERROR: ${1} must be configured."
+    fi
+  done
+}
+
+require_user() {
+  if [[ "$USER" != "${1}" ]]
+  then log error "this pgha action must be run as user '${1}'"
   fi
 }
 
-require_root_user() {
-  # TODO: IF user is root, re-exec as postgres
-  if (( UID > 0 ))
-  then log error "this pgha action must be run as user 'root'"
-  fi
-}
-
-
-require_etcd_addr() {
-  if variable is empty etcd_addr
-  then log error "ERROR: etcd_addr must be configured."
-  fi
-}
-
-require_pgdata() {
-  if [[ -z ${PGDATA} ]]
-  then log error "environment variable 'PGDATA' must be set."
-  fi
-}
-
-require_master_ip() {
-  if [[ -z ${master_ip} ]]
-  then log fail "'master <ip>' must be set in etcd."
-  fi
-}

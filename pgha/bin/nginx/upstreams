@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
-require_root_user
-
-require_etcd_addr
+require_user root
+require_variables etcd_addr
 
 read_pgha_ips
 

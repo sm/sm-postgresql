@@ -1,24 +1,24 @@
 #!/usr/bin/env bash
 
-# TODO: Account for etcd.
-
-if [[ -s ${pghaLog} ]]
-then tail -n 100 ${pghaLog}
-fi
-
 echo "
+my_ip: ${my_ip}
+etcd_addr: ${etcd_addr}
+
 master_ip: ${master_ip}
 sync_ip: ${sync_ip}
 replica_ips: ${replica_ips[*]}
 "
-if [[ -s ${replicatingFile} ]]
-then echo "replicatingSince: $(cat ${replicatingFile})"
+
+if [[ -s ${replicating_file} ]]
+then echo "replicatingSince: $(cat ${replicating_file})"
+fi
+
+if [[ -s ${pgha_log} ]]
+then tail -n 100 ${pgha_log}
 fi
 
 if isResponsive ${master_ip}
 then echo "master: online"
 else echo "master: offline"
 fi
-
-exit 0
 

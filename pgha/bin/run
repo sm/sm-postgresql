@@ -25,13 +25,12 @@
 # Keep track of where we go next.
 #
 
-require_postgres_user
-
-require_master_ip
+require_user postgres
+require_variables master_ip
 
 (( ${DEBUG:=0} == 0 )) || set -x
 
-exec &> ${pghaLog}
+exec &> ${pgha_log}
 echo "${timestamp}"
 
 #If the server from the last run is still in the process of replicating, abort this process
@@ -45,7 +44,7 @@ fi
 
 setMyRole
 
-case ${myRole} in
+case ${my_role} in
   (master)
     saveIPs # TODO: Replace this with etcd.
     if isResponsive ${master_ip}

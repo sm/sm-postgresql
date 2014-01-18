@@ -1,6 +1,6 @@
 #!/bin/sh
 
-require_root_user
+require_user root
 
 osRelease=$(cat /etc/*release* | tr '\n' ' ')
 case "${osRelease}" in

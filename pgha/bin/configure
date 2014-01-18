@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+require_variables my_ip etcd_addr
+
+if file exists ${pgha_conf}
+then
+	if file contains string 'etcd_addr'
+	then file replace regex "^etcd_addr=.*$" with "etcd_addr=${etcd_addr}" ${pgha_conf}
+	else file append string "etcd_addr=${etcd_addr}" ${pgha_conf}
+	fi
+	if file contains string 'my_ip'
+	then file replace regex "^my_ip=.*$" with "my_ip=${my_ip}" ${pgha_conf}
+	else file append string "my_ip=${my_ip}" ${pgha_conf}
+	fi
+	if file contains string 'tags'
+	then file replace regex "^tags=.*$" with "tags=$(echo ${tags[*]} | tr ' ' ',')" ${pgha_conf}
+	else file append string "tags=${tags}" ${pgha_conf}
+	fi
+else
+	template install pgha/pgha.conf \
+		to ${pgha_conf} \
+		mode 0644 \
+		owner postgres:postgres \
+		variables \
+		etcd_addr "${etcd_addr}" \
+		my_ip "${my_ip}"
+fi
+
