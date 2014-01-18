@@ -2,7 +2,7 @@
 
 require_root_user
 
-require_etcd_ip
+require_etcd_addr
 
 read_pgha_ips
 

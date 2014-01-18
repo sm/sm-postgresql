@@ -8,7 +8,8 @@ First be sure you have installed and setup etcd,
 		root# sm etcd install 
 		root# sm etcd configure client_ip {ip of master server} peer_ip {ip of master server}
 
-    root# sm pgha nginx configure etcd_ip {etcd ip}
+    root# sm pgha configure etcd_addr {etcd ip}:{etcd port} tags master
+    root# sm pgha initialize
 
 Note that {etcd ip} should be the locally exposed public IP address (not 127.0.0.1).
 This is usually a 10. or 192. network address.

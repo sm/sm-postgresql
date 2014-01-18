@@ -20,11 +20,8 @@ parse_args() {
         array shift extension_args into tgs
         tags=($(echo $tgs | tr ',' ' '))
         ;;
-      (etcd_ip)
-        array shift extension_args into etcd_ip
-        ;;
-      (etcd_port)
-        array shift extension_args into etcd_port
+      (etcd_addr)
+        array shift extension_args into etcd_addr
         ;;
       (my_ip)
         array shift extension_args into my_ip
@@ -155,12 +152,22 @@ replicationIsStarting() {
 }
 
 read_config_defaults() {
-  config read file defaults key etcd_ip from pgha
-  config read file defaults key etcd_port from pgha
+  config read file defaults key etcd_addr from pgha
+}
+
+read_config() {
+  local _addr
+  if file exists /etc/pgha/pgha.conf
+  then 
+    _addr=$(awk -F= '/^etcd_addr=/' /etc/pgha/pgha.conf)
+    if variable is nonempty _addr
+    then etcd_addr="${_addr}"
+    fi
+  fi
 }
 
 etcd_ctl() {
-  etcdctl -C ${etcd_ip}:${etcd_port} "$@"
+  etcdctl -C ${etcd_addr} "$@"
 }
 
 ips_from() {
@@ -194,9 +201,9 @@ require_root_user() {
 }
 
 
-require_etcd_ip() {
-  if [[ -z ${etcd_ip} ]]
-  then log error "ERROR: ${etcd_ip} must be given or set."
+require_etcd_addr() {
+  if variable is empty etcd_addr
+  then log error "ERROR: etcd_addr must be configured."
   fi
 }
 

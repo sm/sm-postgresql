@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if variable is empty my_ip
-then log error "my_ip must be given to initialize pgha."
+then log error "my_ip must be set with configure in order to initialize pgha."
 fi
 
 for tag in ${tags[@]}
