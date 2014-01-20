@@ -28,6 +28,7 @@ else
 		variables \
 		etcd_addr "${etcd_addr}" \
 		my_ip "${my_ip}" \
+    tags "${tags}"
 		pgdata "${pgdata}"
 fi
 
