@@ -4,17 +4,17 @@ require_variables my_ip etcd_addr
 
 if file exists ${pgha_conf}
 then
-	if file contains string 'etcd_addr'
+	if file contains string 'etcd_addr' ${pgha_conf}
 	then file replace regex "^etcd_addr=.*$" with "etcd_addr=${etcd_addr}" ${pgha_conf}
-	else file append string "etcd_addr=${etcd_addr}" ${pgha_conf}
+	else file write append string "etcd_addr=${etcd_addr}" to ${pgha_conf} 
 	fi
-	if file contains string 'my_ip'
+	if file contains string 'my_ip' ${pgha_conf}
 	then file replace regex "^my_ip=.*$" with "my_ip=${my_ip}" ${pgha_conf}
-	else file append string "my_ip=${my_ip}" ${pgha_conf}
+	else file write append string "my_ip=${my_ip}" to ${pgha_conf}
 	fi
-	if file contains string 'tags'
+	if file contains string 'tags' ${pgha_conf}
 	then file replace regex "^tags=.*$" with "tags=$(echo ${tags[*]} | tr ' ' ',')" ${pgha_conf}
-	else file append string "tags=${tags}" ${pgha_conf}
+	else file write append string "tags=${tags}" to ${pgha_conf}
 	fi
 else
 	template install pgha/pgha.conf \
