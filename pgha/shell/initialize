@@ -2,7 +2,7 @@
 
 typeset -x timestamp master_file sync_file replicas_file replicating_file my_role \
   pgha_log pgha_path sync_ip master_ip firstReplica PGDATA DEBUG etcd_addr \
-  expected_master expected_sync current_master current_sync pgha_conf
+  expected_master expected_sync current_master current_sync pgha_conf 
 
 declare -ax replica_ips my_ips args asyncdirs expected_async current_async async_ips \
   tags

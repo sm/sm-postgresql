@@ -159,7 +159,7 @@ read_config() {
   local _addr _key _value
   if file exists ${pgha_conf}
   then 
-    for _key in etcd_addr my_ip tags
+    for _key in etcd_addr my_ip
     do
       _value=$(awk -F= "/^${_key}=/{print \$2}" ${pgha_conf})
       if variable is nonempty ${_value}
@@ -167,6 +167,10 @@ read_config() {
       fi
       unset _value
     done
+    _value=$(awk -F= "/^tags=/{print \$2}" ${pgha_conf})
+    if variable is nonempty _value
+    then tags=($(echo ${_value} | tr "," "\n"))
+    fi
   fi
 }
 
