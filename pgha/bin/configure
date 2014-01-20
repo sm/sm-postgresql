@@ -16,6 +16,10 @@ then
 	then file replace regex "^tags=.*$" with "tags=$(echo ${tags[*]} | tr ' ' ',')" ${pgha_conf}
 	else file write append string "tags=${tags}" to ${pgha_conf}
 	fi
+	if file contains string 'pgdata' ${pgha_conf}
+	then file replace regex "^pgdata=.*$" with "pgdata=${pgdata}" ${pgha_conf}
+	else file write append string "pgdata=${tags}" to ${pgha_conf}
+	fi
 else
 	template install pgha/pgha.conf \
 		to ${pgha_conf} \
@@ -23,6 +27,7 @@ else
 		owner postgres:postgres \
 		variables \
 		etcd_addr "${etcd_addr}" \
-		my_ip "${my_ip}"
+		my_ip "${my_ip}" \
+		pgdata "${pgdata}"
 fi
 

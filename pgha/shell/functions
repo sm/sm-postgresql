@@ -13,7 +13,7 @@ parse_args() {
         array shift extension_args into master_ip
         ;;
       (pgdata)
-        array shift extension_args into PGDATA
+        array shift extension_args into pgdata
         ;;
       (tags)
         declare -a tgs
@@ -137,7 +137,7 @@ isReplicating() {
 }
 
 promoteToMaster() {
-  #touch ${PGDATA}/failover
+  #touch ${pgdata}/failover
   /opt/sm/bin/sm postgresql replication promote
   master_ip=${sync_ip}
   sync_ip=""
@@ -159,7 +159,7 @@ read_config() {
   local _addr _key _value
   if file exists ${pgha_conf}
   then 
-    for _key in etcd_addr my_ip
+    for _key in etcd_addr my_ip pgdata
     do
       _value=$(awk -F= "/^${_key}=/{print \$2}" ${pgha_conf})
       if variable is nonempty ${_value}

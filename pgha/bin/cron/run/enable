@@ -1,20 +1,20 @@
 #!/bin/sh
 
-typeset -x master_ip PGDATA master_file debug entry pgha_path
+typeset -x master_ip pgdata master_file debug entry pgha_path
 debug=0
 
 require_user postgres
-require_variables master_ip PGDATA
+require_variables master_ip pgdata
 
 # TODO: Remove the directory below to use etcd.
-pgha_path=${PGDATA}/../pgha # Parallel to PGDATA
+pgha_path=${pgdata}/../pgha # Parallel to pgdata
 master_file=${pgha_path}/master
 mkdir -p ${pgha_path}
 chown -R postgres:postgres ${pgha_path}
 
 if (( debug == 0 ))
-then entry="* * * * * PGDATA=${PGDATA} /opt/sm/bin/sm pgha run"
-else entry="* * * * * DEBUG=1 PGDATA=${PGDATA} /opt/sm/bin/sm pgha run"
+then entry="* * * * * /opt/sm/bin/sm pgha run"
+else entry="* * * * * DEBUG=1 /opt/sm/bin/sm pgha run"
 fi
 
 if ! crontab -l | grep -q 'pgha run'

@@ -4,15 +4,14 @@
 # pgha - PostgreSQL High Availability Monitor
 #
 # NOTES:
-# - ${PGDATA}/pgha/master file with master IP address 
-#   must be put in place by the provisioner
+# - Be sure that etcdctl is available and etcd is running.
 # - This script runs under the postgresql user as a minutely cronjob:
 #
-#    * * * * * PGDATA=/var/db/postgresql/9.3/data /opt/sm/bin/sm pgha run
+#    * * * * * /opt/sm/bin/sm pgha run
 #
 # - To run manually in debug mode as user postgres:
 # 
-#   DEBUG=1 PGDATA=/var/db/postgresql/9.3/data sm pgha run
+#   DEBUG=1 pgdata=/var/db/postgresql/9.3/data sm pgha run
 #
 # TODO: 
 # - vmotion master comes back online safely.

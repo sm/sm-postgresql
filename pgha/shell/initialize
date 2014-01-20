@@ -1,7 +1,7 @@
 #!/bin/sh
 
 typeset -x timestamp master_file sync_file replicas_file replicating_file my_role \
-  pgha_log pgha_path sync_ip master_ip firstReplica PGDATA DEBUG etcd_addr \
+  pgha_log pgha_path sync_ip master_ip firstReplica pgdata DEBUG etcd_addr \
   expected_master expected_sync current_master current_sync pgha_conf 
 
 declare -ax replica_ips my_ips args asyncdirs expected_async current_async async_ips \
@@ -16,11 +16,11 @@ read_config_defaults
 
 read_config
 
-require_variables PGDATA
+require_variables pgdata
 
 parse_args
 
-pgha_path=${PGDATA}/../pgha
+pgha_path=${pgdata}/../pgha
 pgha_log=${pgha_path}/pgha.log
 master_file=${pgha_path}/master
 sync_file=${pgha_path}/sync
