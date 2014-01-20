@@ -10,6 +10,8 @@ declare -ax replica_ips my_ips args asyncdirs expected_async current_async async
 export PATH="/bin:/usr/bin:/sbin:/usr/sbin:/opt/sm/pkg/active/bin:/usr/local/bin"
 (( ${DEBUG:=0} == 0 )) || set -x
 
+pgha_conf=/etc/pgha/pgha.conf
+
 read_config_defaults
 
 read_config
@@ -20,7 +22,6 @@ parse_args
 
 pgha_path=${PGDATA}/../pgha
 pgha_log=${pgha_path}/pgha.log
-pgha_conf=/etc/pgha/pgha.conf
 master_file=${pgha_path}/master
 sync_file=${pgha_path}/sync
 replicas_file=${pgha_path}/replicas
