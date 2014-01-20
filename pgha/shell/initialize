@@ -16,8 +16,6 @@ read_config_defaults
 
 read_config
 
-require_variables pgdata
-
 parse_args
 
 pgha_path=${pgdata}/../pgha
