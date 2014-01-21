@@ -15,9 +15,6 @@ parse_args() {
       (pgdata)
         array shift extension_args into pgdata
         ;;
-      (conf_tags)
-        array shift extension_args into conf_tags
-        ;;
       (tags)
         declare -a tgs
         array shift extension_args into tgs
@@ -213,3 +210,6 @@ require_user() {
   fi
 }
 
+tags_to_string() {
+	echo ${tags[*]} | tr ' ' ','
+}

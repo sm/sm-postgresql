@@ -13,7 +13,7 @@ then
 	else file write append string "my_ip=${my_ip}" to ${pgha_conf}
 	fi
 	if file contains string 'tags' ${pgha_conf}
-	then file replace regex "^tags=.*$" with "tags=$(echo ${tags[*]} | tr ' ' ',')" ${pgha_conf}
+	then file replace regex "^tags=.*$" with "tags=$(tags_to_string)" ${pgha_conf}
 	else file write append string "tags=${tags}" to ${pgha_conf}
 	fi
 	if file contains string 'pgdata' ${pgha_conf}
@@ -28,7 +28,7 @@ else
 		variables \
 		etcd_addr "${etcd_addr}" \
 		my_ip "${my_ip}" \
-    tags "${conf_tags}" \
+    tags "$(tags_to_string)" \
 		pgdata "${pgdata}"
 fi
 
