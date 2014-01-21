@@ -23,6 +23,7 @@
 #
 # Keep track of where we go next.
 #
+# TODO: Remove pgdata once everything is configured via etcd.
 
 require_user postgres
 require_variables master_ip
