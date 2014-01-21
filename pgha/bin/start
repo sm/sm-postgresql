@@ -4,9 +4,9 @@ for tag in ${tags[@]}
 do
 	case ${tag} in
 		(pglb)                   sm pgha nginx upstreams; sm nginx start ;;
-		(postgres|postgresql|pg) sm postgresql start ;;
+		(postgres|postgresql|pg) true ;;
 		(master)                 sm postgresql start ;;
-		(replica)                sm postgresql start ;;
+		(replica)                true ;;
 		(*) echo "Unhandled tag '${tag}', skipping." ;;
 	esac
 done
