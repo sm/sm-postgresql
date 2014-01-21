@@ -3,7 +3,7 @@
 for tag in ${tags[@]}
 do
 	case ${tag} in
-		(pglb)                   sm nginx start ;;
+		(pglb)                   sm pgha nginx upstreams; sm nginx start ;;
 		(postgres|postgresql|pg) sm postgresql start ;;
 		(master)                 sm postgresql start ;;
 		(replica)                sm postgresql start ;;
