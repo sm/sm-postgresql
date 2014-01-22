@@ -142,6 +142,7 @@ promoteToMaster() {
   master_ip=${sync_ip}
   sync_ip=""
   replica_ips=()
+  saveToEtcd
 }
 
 replicationIsStarting() {

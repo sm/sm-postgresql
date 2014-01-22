@@ -71,6 +71,7 @@ case ${my_role} in
       if (( ${#replica_ips} == 1 ))
       then # I am a replica and no other replicas exist.
         promoteToMaster
+        saveToEtcd
       elif  (( ${#replica_ips} > 1 ))
       then
         firstReplica=${replica_ips[1]}
