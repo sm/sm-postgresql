@@ -4,6 +4,11 @@ require_user root
 
 osRelease=$(cat /etc/*release* | tr '\n' ' ')
 case "${osRelease}" in
+	(*Red Hat Enterprise Linux*)
+		os="rhel"
+		pkg="yum"
+		firewall="iptables"
+		;;
 	(*CentOS*)
 		os="centos"
 		pkg="yum"
@@ -57,7 +62,7 @@ case ${firewall} in
 COMMIT
 EOF
       case ${os} in 
-        (centos|ubuntu|debian)
+        (centos|ubuntu|debian|rhel)
           service iptables restart
           ;;
         (fedora)
