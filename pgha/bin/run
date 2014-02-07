@@ -58,7 +58,7 @@ case ${my_role} in
   (replica)
     if isResponsive ${master_ip}
     then 
-      saveIps
+      saveIPs
     elif [[ -n ${sync_ip} ]] && isResponsive ${sync_ip}
     then 
       master_ip=${sync_ip}
@@ -81,7 +81,7 @@ case ${my_role} in
           if replicateFromMaster
           then
             loadIPs
-            saveIPs
+            saveToEtcd
           fi
         fi
       fi
@@ -93,7 +93,7 @@ case ${my_role} in
       if replicateFromMaster
       then
         loadIPs
-        saveIPs
+        saveToEtcd
       fi
     elif [[ -n "${sync_ip}" ]] && isResponsive ${sync_ip}
     then
@@ -101,7 +101,7 @@ case ${my_role} in
       if replicateFromMaster
       then
         loadIPs
-        saveIPs
+        saveToEtcd
       fi
     fi
     ;;
