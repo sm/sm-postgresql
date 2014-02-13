@@ -7,6 +7,7 @@ do
 	case ${tag} in
 		(master)                 
 			etcd_ctl set pgha/master/ip "${my_ip}"
+			pghba_configure
 			;;
 	esac
 done
