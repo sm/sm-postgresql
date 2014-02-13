@@ -142,6 +142,7 @@ promoteToMaster() {
   master_ip=${sync_ip}
   sync_ip=""
   replica_ips=()
+  saveToEtcd
 }
 
 replicationIsStarting() {
@@ -187,7 +188,7 @@ ips_from() {
 read_pgha_ips() {
   master_ip=$(etcd_ctl get pgha/master/ip)
   sync_ip=$(etcd_ctl get pgha/sync/ip)
-  async_ips=($(etcd_ctl get pgha/async/ips | sort))
+  async_ips=($(etcd_ctl get pgha/asyncs/ips | sort))
   replica_ips=(${sync_ip} ${async_ips[@]})
   current_master=$(ips_from /etc/nginx/tcp/upstreams/master)
   current_sync=$(ips_from /etc/nginx/tcp/upstreams/sync)

@@ -1,7 +1,6 @@
 #!/bin/sh
 
 require_user root
-require_variables master_ip
 
 if (( debug == 0 ))
 then entry="* * * * * /opt/sm/bin/sm pgha nginx upstreams"

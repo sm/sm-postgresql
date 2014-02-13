@@ -46,7 +46,6 @@ setMyRole
 
 case ${my_role} in
   (master)
-    saveIPs # TODO: Replace this with etcd.
     if isResponsive ${master_ip}
     then saveToEtcd
     fi
@@ -55,7 +54,6 @@ case ${my_role} in
     if ! isResponsive ${master_ip}
     then promoteToMaster
     fi
-    saveIPs # TODO: Replace this with etcd.
     ;;
   (replica)
     if isResponsive ${master_ip}
@@ -67,12 +65,13 @@ case ${my_role} in
       if replicateFromMaster
       then
         loadIPs
-        saveIPs # TODO: Replace this with etcd.
+        saveIPs
       fi
     else # master and sync replica are offline...
       if (( ${#replica_ips} == 1 ))
       then # I am a replica and no other replicas exist.
         promoteToMaster
+        saveToEtcd
       elif  (( ${#replica_ips} > 1 ))
       then
         firstReplica=${replica_ips[1]}
@@ -82,7 +81,7 @@ case ${my_role} in
           if replicateFromMaster
           then
             loadIPs
-            saveIPs # TODO: Replace this with etcd.
+            saveToEtcd
           fi
         fi
       fi
@@ -94,7 +93,7 @@ case ${my_role} in
       if replicateFromMaster
       then
         loadIPs
-        saveIPs # TODO: Replace this with etcd.
+        saveToEtcd
       fi
     elif [[ -n "${sync_ip}" ]] && isResponsive ${sync_ip}
     then
@@ -102,7 +101,7 @@ case ${my_role} in
       if replicateFromMaster
       then
         loadIPs
-        saveIPs # TODO: Replace this with etcd.
+        saveToEtcd
       fi
     fi
     ;;
