@@ -220,7 +220,7 @@ pghba_configure() {
   if ! grep -q "${network}" ${pgdata}/pghba.conf
   then
     echo "Configuring pg_hba.conf to trust all vms on the vagrant private network '${network}.0'."
-    echo "host replication postgres ${network}.0/24 trust " >> ${pgdata}/pghba.conf
-    echo "host all all ${network}.0/24 trust "              >> ${pgdata}/pghba.conf
+    echo "host replication postgres ${network}.0/24 trust " >> ${pgdata}/pg_hba.conf
+    echo "host all all ${network}.0/24 trust "              >> ${pgdata}/pg_hba.conf
   fi
 }
