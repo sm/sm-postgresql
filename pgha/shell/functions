@@ -217,7 +217,7 @@ tags_to_string() {
 
 pghba_configure() {
   network=${my_ip%.*}
-  if ! grep -q "${network}" ${pgdata}/pghba.conf
+  if ! grep -q "${network}" ${pgdata}/pg_hba.conf
   then
     echo "Configuring pg_hba.conf to trust all vms on the vagrant private network '${network}.0'."
     echo "host replication postgres ${network}.0/24 trust " >> ${pgdata}/pg_hba.conf
