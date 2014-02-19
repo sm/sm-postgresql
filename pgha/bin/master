@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+require_variables my_ip
+
+etcd_ctl set pgha/master/ip "${my_ip}"
+pghba_configure
+
+
