@@ -2,7 +2,7 @@
 
 require_user postgres
 
-if crontab -l | grep -q pgha 
-then (crontab -l | grep -v pgha) | crontab -
+if crontab -l | grep -q 'sm pgha run' 
+then (crontab -l | grep -v 'sm pgha run') | crontab -
 fi
 
