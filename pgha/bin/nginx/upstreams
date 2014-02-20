@@ -24,7 +24,7 @@ then
 
   if [[ ${#async_ips[@]} -eq 0 ]]
   then
-    asyncs+= "\tserver ${sync_ip}:5432;"
+    asyncs+="\tserver ${sync_ip}:5432;"
   else 
 	  for line in ${async_ips[@]} ; do asyncs+="\tserver $line:5432;" ; done
   fi
