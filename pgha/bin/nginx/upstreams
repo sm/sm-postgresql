@@ -22,21 +22,23 @@ then
 	echo -e "upstream sync {\n\tserver ${sync_ip}:5432;\n}" \
 		> /etc/nginx/tcp/upstreams/sync
 
-  if [[ ${#async_ips[@]} -eq 0 ]]
-  then
-    asyncs+="\tserver ${sync_ip}:5432;"
-  else 
-	  for line in ${async_ips[@]} ; do asyncs+="\tserver $line:5432;" ; done
-  fi
+	if [[ ${#async_ips[@]} -eq 0 ]]
+	then
+		asyncs+="\tserver ${sync_ip}:5432;\n"
+	else 
+		for line in ${async_ips[@]} 
+		do asyncs+="\tserver $line:5432;\n" 
+		done
+	fi
 
 	#Write out async file
-	echo -e "upstream async {\n${asyncs}\n}" \
+	echo -e "upstream async {\n${asyncs}}" \
 		> /etc/nginx/tcp/upstreams/async
 
 	#Write out replicas file (sync + asyncs)
-	echo -e "upstream replicas {\n\tserver ${sync_ip}:5432;\n${asyncs}\n}" \
+	echo -e "upstream replicas {\n\tserver ${sync_ip}:5432;\n${asyncs}}" \
 		> /etc/nginx/tcp/upstreams/replicas
 
-	
-  sm nginx restart
+
+	sm nginx restart
 fi
