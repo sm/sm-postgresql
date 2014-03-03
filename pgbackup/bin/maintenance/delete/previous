@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+must_not_be_root
+
+echo "Job Started At: $(date)"
+
+#Determine if this is the master, if so, run the delete 
+readOnly=$(psql postgres -t -A -c "SHOW transaction_read_only;")
+
+if [[ ${readOnly} == "off" ]]
+then 
+	export WALE_SWIFT_PREFIX="swift://${swiftContainerName}"
+	export SWIFT_AUTHURL="${swiftAuthUrl}"
+	export SWIFT_TENANT="${swiftTenant}"
+	export SWIFT_USER="${swiftUser}"
+	export SWIFT_PASSWORD="${swiftPassword}"
+	/usr/bin/wal-e delete --confirm retain ${backupsToKeep}
+else 
+	echo "This server is a replica, $0 command ignored."
+fi
+
+echo "Job Ended At: $(date)"
+

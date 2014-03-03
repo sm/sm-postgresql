@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+must_not_be_root
+
+# Set location of backup-base script
+backupBase="/opt/sm/bin/sm pgbackup backup base"
+
+# Schedule daily base backup at 2AM (local)
+entry="0 2 * * * ${backupBase} > ${backupLog} 2>&1"
+
+if ! crontab -l | grep -q 'pgbackup backup base'
+then (crontab -l ; echo "${entry}") | crontab -
+fi
+

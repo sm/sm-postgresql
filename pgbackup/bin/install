@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+must_be_root
+
+setup_os_packages
+
+install_wal_e
+

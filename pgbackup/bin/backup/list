@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+echo "Job Started At: $(date)"
+
+must_not_be_root
+
+WALE_SWIFT_PREFIX="swift://${swiftContainerName}" SWIFT_AUTHURL="${swiftAuthUrl}" SWIFT_TENANT="${swiftTenant}" SWIFT_USER="${swiftUser}" SWIFT_PASSWORD="${swiftPassword}" /usr/bin/wal-e backup-list  
+
+echo "Job Ended At: $(date)"
+

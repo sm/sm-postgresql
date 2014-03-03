@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+must_not_be_root
+
+# Set location of script
+deletePrevious="/opt/sm/bin/sm pgbackup maintenance delete previous"
+
+# Schedule daily base backup at 2AM (local)
+entry="0 2 * * * ${deletePrevious} > ${maintenanceLog} 2>&1"
+
+if ! crontab -l | grep -q 'pgbackup delete previous'
+then (crontab -l ; echo "${entry}") | crontab -
+fi
+

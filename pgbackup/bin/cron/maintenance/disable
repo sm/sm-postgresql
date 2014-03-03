@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+must_not_be_root
+
+if crontab -l | grep -q "pgbackup maintenance delete previous"
+then (crontab -l | grep -v "pgbackup maintenance delete previous") | crontab -
+fi
+

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+must_not_be_root
+
+#Modify the postgresql.conf file to allow wal-e streaming backups
+sed -i \
+    -e "s/^.*archive_mode.*=.*$/archive_mode = on/" \
+    -e "s/^.*archive_timeout.*=.*$/archive_timeout = 60/" \
+    -e "s/^.*wal_level.*=.*$/wal_level = hot_standby/" \
+    -e "s|^.*archive_command.*=.*$|archive_command = 'WALE_SWIFT_PREFIX="\""swift://${swiftContainerName}"\"" SWIFT_AUTHURL="\""${swiftAuthUrl}"\"" SWIFT_TENANT="\""${swiftTenant}"\"" SWIFT_USER="\""${swiftUser}"\"" SWIFT_PASSWORD="\""${swiftPassword}"\"" /usr/bin/wal-e wal-push %p > ${walLog} 2>\&1 ' |" \
+    ${pgConf}
+

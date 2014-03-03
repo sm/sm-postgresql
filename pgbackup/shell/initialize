@@ -1,0 +1,71 @@
+#!/bin/sh
+
+typeset -x swiftContainerName swiftAuthUrl swiftTenant swiftUser swiftPassword recoveryTargetTime backupsToKeep baseBackupName
+
+source /etc/pgbackup/pgbackup.conf # Load Swift authentication defaults
+source /etc/profile
+
+(( ${DEBUG:-0} == 0 )) || set -x
+
+pgbackupLogPath=${pgLogPath:-"/var/log/pgbackup"}
+#Should match the same logic as pgha to determine postgresql install location
+pgVersion=${pgVersion:-9.3.1}																															#Version of Postgresql installed
+pgData=${pgData:-/var/db/postgresql/${pgVersion%.*}/data}																	#Location of datadir
+pgConf=${pgConf:-${pgData}/postgresql.conf}																								#Location of postgresql.conf file
+pgConfigBackups=${pgConfigBackups:-/var/db/postgresql/${pgVersion%.*}/backup_configs}			#Location where *.conf files will be copied to before a restore (which wipes out the datadir)
+
+#Misc Parameters
+backupsToKeep=5															#Number of most recent base+WALs to keep, deleting all others
+recoveryTargetTime="2014-01-01 00:00:00"		#If restoring to a point-in-time, set this to the date/time you want the database restored to. The time must be after the base backup used.
+baseBackupName="LATEST"											#The name of the base backup to use during a restore, the alias for the most recent is "LATEST", run a backup-list command to see all the available names which could be used 
+
+# Log file locations
+maintenanceLog="${pgbackupLogPath}/cron.maintenance.log"	#Set location of cron maintenance job output file
+backupLog="${pgbackupLogPath}/cron.backups.log"					#Set location of cron backup job output file
+walLog="${pgbackupLogPath}/wal.log"											#Set location of wal log outputs as configured in postgresql.conf
+
+#Command line params override defaults
+while (( $# ))
+do
+	token="$1"
+	shift
+	case ${token} in
+		(swiftContainerName)
+			swiftContainerName=${1}
+			shift
+			;;
+		(swiftAuthUrl)
+			swiftAuthUrl=${1}
+			shift
+			;;
+		(swiftTenant)
+			swiftTenant=${1}
+			shift
+			;;
+		(swiftUser)
+			swiftUser=${1}
+			shift
+			;;
+		(swiftPassword)
+			swiftPassword=${1}
+			shift
+			;;
+		(recoveryTargetTime)
+			recoveryTargetTime=${1}
+			shift
+			;;
+		(backupsToKeep)
+			backupsToKeep=${1}
+			shift
+			;;
+		(baseBackupName)
+			baseBackupName=${1}
+			shift
+			;;
+		(*)
+			echo "UNKNOWN Argument Given: ${token}" >&2
+			exit 1
+			;;
+	esac
+done
+

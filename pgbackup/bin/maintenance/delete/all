@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+must_not_be_root
+
+echo "Job Started At: $(date)"
+
+#Delete everything
+export WALE_SWIFT_PREFIX="swift://${swiftContainerName}"
+export SWIFT_AUTHURL="${swiftAuthUrl}"
+export SWIFT_TENANT="${swiftTenant}"
+export SWIFT_USER="${swiftUser}"
+export SWIFT_PASSWORD="${swiftPassword}"
+
+/usr/bin/wal-e --terse delete --confirm everything
+
+echo "Job Ended At: $(date)"
+

@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+must_not_be_root
+
+#Disable pgha cron job
+sm pgha cron run disable
+sm postgresql stop #(async, then sync, then master)
+
+cat <<EOF >  ${pgData}/recovery.conf
+restore_command = 'WALE_SWIFT_PREFIX="swift://${swiftContainerName}" SWIFT_AUTHURL="${swiftAuthUrl}" SWIFT_TENANT="${swiftTenant}" SWIFT_USER="${swiftUser}" SWIFT_PASSWORD="${swiftPassword}" /usr/bin/wal-e wal-fetch "%f" "%p"'
+EOF
+
+#Make copies of the configuration files (just in case)
+mkdir -p ${pgConfigBackups}
+cp ${pgData}/*.conf ${pgConfigBackups}/
+
+#Remove the existing data folder
+rm -rf ${pgData}
+
+#Fetch the most recent base backup
+export WALE_SWIFT_PREFIX="swift://${swiftContainerName}"
+export SWIFT_AUTHURL="${swiftAuthUrl}"
+export SWIFT_TENANT="${swiftTenant}"
+export SWIFT_USER="${swiftUser}"
+export SWIFT_PASSWORD="${swiftPassword}"
+/usr/bin/wal-e --terse backup-fetch ${pgData} LATEST
+
+#Copy Configuration files back if they were deleted
+cp ${pgConfigBackups}/* ${pgData}/
+
+#Assign permissions to the files correctly
+chmod 0700 ${pgData}
+
+#Restart postgresql
+sm postgresql start
+
+#Re-enable pgha cron job
+sm pgha cron run enable
+
+#On the other replica servers be sure to run:
+#sm postgresql replication configure master <ip_address of master>
+

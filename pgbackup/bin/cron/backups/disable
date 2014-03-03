@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+must_not_be_root
+
+if crontab -l | grep -q "pgbackup backup base"
+then (crontab -l | grep -v "pgbackup backup base") | crontab -
+fi
+
