@@ -6,8 +6,8 @@
 
 # Stop the replica server
 sm postgresql stop
-master=chargify-dbm-p0
-replica=chargify-dbr-p0 # localhost
+master=pg-master
+replica=pg-slave
 
 # Connect the SSH dots
 # Note that this must succeed before replication can be setup properly below.
